@@ -1,9 +1,10 @@
 /* Raw Material Label System - offline service worker
    Cache ka naam har release par badlein, warna purani file serve hoti rahegi. */
-const CACHE = 'rmls-v2.4.0-2';
+const CACHE = 'rmls-v2.4.1';
 
 const SHELL = [
-  './raw_material_label_generator.html',
+  './',
+  './index.html',
   './manifest.webmanifest',
   './icons/icon.svg',
   './icons/icon-192.png',
@@ -40,7 +41,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then(hit => hit || caches.match('./raw_material_label_generator.html')))
+        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
     );
     return;
   }

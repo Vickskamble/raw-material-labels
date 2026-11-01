@@ -3,7 +3,7 @@
   "short_name": "RM Labels",
   "description": "Pharmaceutical GMP raw material identification label generator with barcode scanning, expiry checks and standard label sizes.",
   "lang": "en",
-  "start_url": "./raw_material_label_generator.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -34,7 +34,7 @@
     {
       "name": "Open label generator",
       "short_name": "Labels",
-      "url": "./raw_material_label_generator.html"
+      "url": "./"
     }
   ]
 }

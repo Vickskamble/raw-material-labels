@@ -1,7 +1,7 @@
 GITHUB PAGES PAR HOST KARNE KE STEPS
 ====================================================================
 
-Is folder mein sirf wahi files hain jo customer ko deni/host karni hain.
+Is folder mein sirf wahi files hain jo host karni hain.
 license_key_generator.html yahan NAHI hai — use kabhi upload na karein.
 
 
@@ -16,39 +16,63 @@ STEP 2 - Naya repository
   4. "Create repository" dabayein.
 
 
-STEP 3 - Files upload karein
+STEP 3 - Files upload karein (repo ke ROOT mein)
   1. Repository ke andar "Add file" -> "Upload files".
-  2. Is folder ki ye cheezein drag-and-drop karein:
-        raw_material_label_generator.html
+  2. Is folder ke andar ki ye cheezein drag-and-drop karein:
+        index.html
         manifest.webmanifest
         sw.js
+        README.md
+        SETUP.txt
         icons  (poora folder)
   3. Neeche "Commit changes" dabayein.
+
+  ZAROORI: files repo ke root mein honi chahiye, kisi extra folder ke andar nahi.
+  Sahi structure:
+        /index.html
+        /manifest.webmanifest
+        /sw.js
+        /icons/icon.svg ...
+  Galat structure:
+        /github-pages/index.html   <- isse link lamba aur 404 ho sakta hai
 
 
 STEP 4 - GitHub Pages on karein
   1. Repository -> Settings -> Pages.
   2. "Build and deployment" mein Source: "Deploy from a branch".
   3. Branch: main, folder: / (root) -> Save.
-  4. 1-2 minute wait karein.
+  4. 1-3 minute wait karein. Actions tab mein deployment dekh sakte hain.
 
 
 STEP 5 - Link kholein
   Aapka link hoga:
-    https://<username>.github.io/raw-material-labels/raw_material_label_generator.html
+        https://<username>.github.io/raw-material-labels/
 
   Example:
-    https://rahul123.github.io/raw-material-labels/raw_material_label_generator.html
+        https://rahul123.github.io/raw-material-labels/
+
+  Bas itna hi — file ka naam add karne ki zaroorat nahi, kyunki file ka
+  naam index.html hai.
 
   Chrome / Edge mein kholein.
   Address bar ke install icon ya header ke "Install" button se install karein.
 
 
+404 AA RAHA HAI? YE CHECK KAREIN
+  1. URL ke aakhir mein "/" hai? Sahi: .../raw-material-labels/
+  2. Repository Public hai? (Settings -> General -> Danger Zone)
+  3. Settings -> Pages par "Your site is live at ..." dikh raha hai?
+  4. Branch main hi hai? (master nahi)
+  5. index.html repo ke ROOT mein hai? (kisi folder ke andar nahi)
+  6. File ka naam exactly "index.html" hai? (I capital, chhota)
+  7. Enable karne ke baad 1-3 minute wait kiya?
+  8. Repo ka naam URL se match karta hai? (case-sensitive nahi, par spelling)
+
+
 UPDATE KAISE KAREIN
-  1. Naya HTML GitHub par upload karke commit karein.
+  1. Naya index.html GitHub par upload karke commit karein.
   2. sw.js kholkar CACHE ka version badlein, jaise:
-        rmls-v2.4.0-2  ->  rmls-v2.4.1
-     (warna browser purani cached file dikhata rahega)
+        rmls-v2.4.1  ->  rmls-v2.4.2
   3. Users app ko band karke dobara kholein.
 
 
@@ -56,7 +80,6 @@ DHYAN RAKHEIN
   - GitHub Pages HTTPS deta hai, isliye PWA install + offline support chalega.
   - Repo public hoga, to app ka code sab dekh sakte hain. Licence system
     client-side hi hai, isliye technical user bypass kar sakta hai.
-    Zyada protection chahiye to server-side licence (Option B/C) lagega.
   - license_key_generator.html, backup files, HOW-TO-USE.txt — inhe upload
     karne ki zaroorat nahi. Sirf is folder ki files upload karein.
   - File names ka case GitHub par matter karta hai: icons/icon.svg,

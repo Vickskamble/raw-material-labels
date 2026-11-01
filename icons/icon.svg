@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Raw Material Label System">
+  <rect width="512" height="512" rx="100" fill="#0b1f33"/>
+  <path d="M256 74 118 140v128c0 88 58 152 138 180 80-28 138-92 138-180V140L256 74Z"
+        fill="none" stroke="#2dd4bf" stroke-width="16" stroke-linejoin="round"/>
+  <path d="M176 258l56 56 108-118"
+        fill="none" stroke="#2dd4bf" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
