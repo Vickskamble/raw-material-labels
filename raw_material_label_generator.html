@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Pharmaceutical GMP raw material identification label generator with barcode scanning, expiry and retest checks, standard 100 x 150 mm label printing, auto-shrink text and offline PWA support.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0b1f33">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RM Labels">
+<title>Raw Material Label System &middot; Pharmaceutical GMP</title>
+<style id="pageStyle"></style>
+<style>
+  :root{
+    --navy-950:#071624;
+    --navy-900:#0b1f33;
+    --navy-800:#102a43;
+    --navy-700:#173d5e;
+    --teal-700:#0f766e;
+    --teal-600:#0d9488;
+    --green-700:#15803d;
+    --green-600:#16a34a;
+    --green-50:#ecfdf3;
+    --amber-700:#b45309;
+    --amber-50:#fffbeb;
+    --red-700:#b91c1c;
+    --red-50:#fef2f2;
+    --blue-700:#1d4ed8;
+    --blue-50:#eff6ff;
+    --slate-50:#f8fafc;
+    --slate-100:#eef2f7;
+    --slate-200:#dde5ee;
+    --slate-300:#cbd5e1;
+    --slate-500:#64748b;
+    --slate-600:#475569;
+    --slate-700:#334155;
+    --white:#ffffff;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 10px 30px rgba(15,23,42,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Segoe UI",Inter,system-ui,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#eef3f8 0%,#e9eef5 100%);
+    color:var(--navy-900);
+    font-size:15px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  button,input,select,textarea{font:inherit}
+  svg{display:block}
+
+  /* ---------- Top bar ---------- */
+  .app-bar{
+    position:sticky;top:0;z-index:50;
+    background:linear-gradient(115deg,#081a2b 0%,#10324e 55%,#0d4a52 100%);
+    color:#fff;
+    padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    box-shadow:0 4px 20px rgba(3,15,27,.22);
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .brand{display:flex;align-items:center;gap:14px;min-width:250px}
+  .brand-mark{
+    width:46px;height:46px;border-radius:12px;flex:0 0 auto;
+    display:grid;place-items:center;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);
+    color:#7dd3c7;
+  }
+  .brand h1{font-size:19px;line-height:1.2;margin:0;font-weight:650;letter-spacing:.2px}
+  .brand .subtitle{
+    margin:3px 0 0;font-size:10.5px;letter-spacing:1.3px;text-transform:uppercase;
+    color:#9fc0d8;font-weight:600;
+  }
+  .app-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 12px;border-radius:999px;
+    font-size:12.5px;font-weight:600;letter-spacing:.2px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18);
+    color:#e6f2fb;white-space:nowrap;
+  }
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.16)}
+  .chip.warn .dot{background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.16)}
+  .chip.danger .dot{background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.16)}
+  .app-actions .btn{
+    background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2);
+    padding:7px 12px;font-size:13px;
+  }
+  .app-actions .btn:hover{background:rgba(255,255,255,.16)}
+
+  /* ---------- Layout ---------- */
+  .container{max-width:1120px;margin:0 auto;padding:24px 20px 10px}
+  .card{
+    background:var(--white);border:1px solid var(--slate-200);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+  }
+  .input-card{padding:20px 22px}
+  .card-title{margin:0;font-size:16px;font-weight:650;letter-spacing:.1px;display:flex;align-items:center;gap:8px}
+  .card-title .tag{
+    font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    background:var(--green-50);color:var(--green-700);
+    border:1px solid #bbf7d0;border-radius:999px;padding:2px 8px;
+  }
+  .hint{font-size:13px;color:var(--slate-500);margin:6px 0 12px}
+  .link-btn{
+    background:none;border:none;padding:0;color:var(--teal-700);
+    font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .link-btn:hover{color:var(--teal-600)}
+  textarea{
+    width:100%;height:138px;padding:12px 14px;
+    font-size:14.5px;line-height:1.55;
+    border:1.5px solid var(--slate-300);border-radius:10px;
+    resize:vertical;font-family:Consolas,"Courier New",monospace;
+    background:var(--slate-50);color:var(--navy-900);
+    outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  textarea::placeholder{color:#94a3b8}
+  textarea:focus{border-color:var(--teal-600);box-shadow:0 0 0 4px rgba(13,148,136,.12);background:#fff}
+  .input-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .scan-count{font-size:12px;color:var(--slate-500)}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+  .toolbar .spacer{flex:1 1 auto}
+  .sel-wrap{display:flex;flex-direction:column;gap:3px}
+  .sel-wrap label{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--slate-500);font-weight:700}
+  select{
+    border:1.5px solid var(--slate-300);border-radius:9px;background:#fff;
+    padding:8px 30px 8px 11px;font-size:13.5px;color:var(--navy-800);cursor:pointer;
+    outline:none;min-height:38px;
+    appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,var(--slate-500) 50%),linear-gradient(135deg,var(--slate-500) 50%,transparent 50%);
+    background-position:calc(100% - 16px) 16px,calc(100% - 11px) 16px;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  }
+  select:focus{border-color:var(--teal-600);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid var(--slate-300);background:#fff;color:var(--navy-800);
+    padding:9px 15px;border-radius:9px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s,transform .05s;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--slate-50);border-color:var(--slate-400,#94a3b8)}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:3px solid rgba(13,148,136,.3);outline-offset:2px}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  .btn[hidden]{display:none !important}
+  .btn svg{width:16px;height:16px;flex:0 0 auto}
+  .btn-primary{background:linear-gradient(135deg,var(--teal-700),var(--teal-600));border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(13,148,136,.25)}
+  .btn-primary:hover{background:linear-gradient(135deg,#0e6b64,#0c857a);border-color:transparent}
+  .btn-success{background:linear-gradient(135deg,#166534,var(--green-600));border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.22)}
+  .btn-success:hover{background:linear-gradient(135deg,#14532d,#15803d);border-color:transparent}
+  .btn-danger{background:var(--red-50);border-color:#fecaca;color:var(--red-700)}
+  .btn-danger:hover{background:#fee2e2;border-color:#fca5a5}
+  .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+
+  /* ---------- Stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:18px 0}
+  .stat{
+    background:#fff;border:1px solid var(--slate-200);border-radius:12px;
+    padding:13px 15px;border-left:4px solid var(--slate-300);
+    box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  .stat .n{font-size:25px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--slate-500);font-weight:700;margin-top:3px}
+  .stat .s{font-size:11px;color:var(--slate-500);margin-top:2px}
+  .stat.total{border-left-color:var(--navy-700)}
+  .stat.ready{border-left-color:var(--green-600)}
+  .stat.ready .n{color:var(--green-700)}
+  .stat.incomplete{border-left-color:#f59e0b}
+  .stat.incomplete .n{color:var(--amber-700)}
+  .stat.expired{border-left-color:#ef4444}
+  .stat.expired .n{color:var(--red-700)}
+  .stat.near{border-left-color:var(--blue-700)}
+  .stat.near .n{color:var(--blue-700)}
+
+  .banner{
+    margin:0 0 16px;padding:11px 14px;border-radius:10px;font-size:13.5px;
+    background:var(--blue-50);border:1px solid #bfdbfe;color:#1e3a8a;
+    display:none;line-height:1.55;
+  }
+  .banner b{font-weight:700}
+  .banner b.red{color:var(--red-700)}
+  .banner b.amber{color:var(--amber-700)}
+  .license-warn{
+    margin:0 0 16px;padding:10px 14px;border-radius:10px;font-size:13px;
+    background:var(--amber-50);border:1px solid #fde68a;color:#78350f;
+    display:flex;gap:9px;align-items:flex-start;line-height:1.5;
+  }
+  .license-warn[hidden]{display:none}
+  .license-warn svg{width:17px;height:17px;flex:0 0 auto;margin-top:2px;color:var(--amber-700)}
+
+  /* ---------- Labels ---------- */
+  .labels-wrapper{display:grid;grid-template-columns:1fr;gap:22px;padding-bottom:20px}
+  .label-card{
+    background:#fff;border:2px solid #102a43;border-radius:5px;
+    padding:1.185em 1.333em;position:relative;
+    break-inside:avoid;page-break-inside:avoid;
+    box-shadow:0 2px 10px rgba(15,23,42,.06);
+    font-size:calc(13.5px * var(--fit,1));
+    line-height:1.35;
+  }
+  /* Fixed standard label sizes: on-screen preview matches the printed size */
+  body.fixed-size .label-card{
+    width:var(--label-w);height:var(--label-h);
+    box-sizing:border-box;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  body.fixed-size .label-grid{flex:1 1 auto;align-content:space-between}
+  body.fixed-size .labels-wrapper{justify-items:center}
+  .label-card.incomplete{border:2px dashed var(--red-700);background:#fffafa}
+  .label-head{text-align:center;border-bottom:.148em solid var(--navy-800);padding-bottom:.593em;margin-bottom:.815em}
+  .label-company{
+    font-size:.815em;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--slate-600);
+    overflow-wrap:anywhere;
+  }
+  .label-title{
+    font-size:1.185em;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+    margin-top:.148em;color:var(--navy-900);line-height:1.2;
+  }
+  .label-sub{font-size:.704em;letter-spacing:1.1px;text-transform:uppercase;color:var(--slate-500);margin-top:.148em;font-weight:600}
+  .label-grid{display:grid;grid-template-columns:11.111em 1fr;row-gap:.444em;column-gap:.741em;font-size:1em;align-items:baseline}
+  .label-key{font-weight:700;text-transform:uppercase;font-size:.815em;letter-spacing:.4px;color:var(--slate-600)}
+  .label-val{word-break:break-word;color:#0f172a}
+  .label-val.strong{font-weight:700;font-size:1.074em}
+  .label-val.missing{color:var(--red-700);font-weight:700;font-size:.889em}
+  .label-val.dash{color:#94a3b8}
+  .label-status-row{
+    display:flex;align-items:center;gap:.741em;flex-wrap:wrap;
+    margin-top:.815em;padding-top:.667em;border-top:1px dashed #cbd5e1;
+  }
+  .status-pill{
+    display:inline-block;font-size:.815em;font-weight:800;letter-spacing:1.2px;
+    padding:.222em .889em;border-radius:.296em;border:.111em solid currentColor;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .status-pill.quarantine{color:#92400e;background:#fef3c7}
+  .status-pill.approved{color:#166534;background:#dcfce7}
+  .status-pill.rejected{color:#991b1b;background:#fee2e2}
+  .status-pill.testing{color:#1e40af;background:#dbeafe}
+  .footer-note{
+    margin-top:.889em;border-top:.074em solid var(--navy-800);padding-top:.444em;
+    font-size:.778em;color:var(--slate-600);line-height:1.55;
+  }
+  .foot-note{font-style:italic;text-align:center}
+  .sign-row{display:flex;justify-content:space-between;gap:1.333em;margin-top:.667em;font-size:.741em;color:#334155}
+  .sign-item{display:flex;align-items:flex-end;gap:.444em;flex:1 1 0;min-width:0}
+  .sign-cap{white-space:nowrap;font-weight:600}
+  .sign-line{flex:1 1 auto;min-width:2.074em;border-bottom:.074em solid #475569;height:.889em}
+  .foot-meta{text-align:center;margin-top:.370em;font-size:.667em;letter-spacing:.5px;text-transform:uppercase;color:var(--slate-500)}
+  .stamp-wrap{text-align:center;margin-bottom:.519em}
+  .stamp{
+    display:inline-block;border:.222em solid var(--red-700);color:var(--red-700);
+    font-weight:800;font-size:1.111em;padding:.148em .889em;letter-spacing:.222em;
+    transform:rotate(-3deg);border-radius:.222em;
+  }
+  .issue-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.2px}
+  .badge.red{background:var(--red-700);color:#fff}
+  .badge.amber{background:#fbbf24;color:#000}
+  .badge.grey{background:#64748b;color:#fff}
+  .empty{
+    text-align:center;padding:52px 20px;color:var(--slate-500);
+    border:1.5px dashed var(--slate-300);border-radius:var(--radius);background:rgba(255,255,255,.65);
+  }
+  .empty svg{width:44px;height:44px;margin:0 auto 12px;color:#94a3b8}
+  .empty h3{margin:0 0 4px;font-size:15px;color:var(--navy-800)}
+  .empty p{margin:0;font-size:13px}
+
+  /* ---------- Footer ---------- */
+  .app-footer{
+    max-width:1120px;margin:0 auto;padding:18px 20px 26px;
+    display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;
+    font-size:11.5px;color:var(--slate-500);
+  }
+  .app-footer .sep{color:#cbd5e1}
+
+  /* ---------- Modals ---------- */
+  .modal{
+    position:fixed;inset:0;z-index:900;padding:20px;
+    background:rgba(7,22,36,.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal[hidden]{display:none !important}
+  .modal-card{
+    background:#fff;border-radius:16px;width:min(560px,100%);
+    max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(2,10,20,.45);
+    animation:pop .14s ease-out;
+  }
+  @keyframes pop{from{transform:translateY(8px);opacity:.7}to{transform:none;opacity:1}}
+  .modal-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 22px;border-bottom:1px solid var(--slate-200);
+    position:sticky;top:0;background:#fff;z-index:1;border-radius:16px 16px 0 0;
+  }
+  .modal-head h3{margin:0;font-size:16px;font-weight:650}
+  .icon-btn{
+    border:none;background:var(--slate-100);color:var(--slate-600);
+    width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+    display:grid;place-items:center;
+  }
+  .icon-btn:hover{background:var(--slate-200);color:var(--navy-900)}
+  .modal-body{padding:20px 22px}
+  .modal-foot{
+    display:flex;justify-content:flex-end;gap:10px;
+    padding:14px 22px;border-top:1px solid var(--slate-200);
+    position:sticky;bottom:0;background:#fff;border-radius:0 0 16px 16px;
+  }
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--slate-600);margin-bottom:5px}
+  .field input,.field select{
+    width:100%;border:1.5px solid var(--slate-300);border-radius:9px;
+    padding:9px 11px;font-size:14px;color:var(--navy-900);background:#fff;outline:none;
+  }
+  .field input:focus,.field select:focus{border-color:var(--teal-600);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+  .field .desc{font-size:11.5px;color:var(--slate-500);margin-top:4px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .code-input{
+    width:100%;text-align:center;font-family:Consolas,"Courier New",monospace;
+    font-size:21px;font-weight:700;letter-spacing:2.5px;
+    padding:11px 10px;border:2px solid var(--slate-300);border-radius:10px;
+    text-transform:uppercase;outline:none;
+  }
+  .code-input:focus{border-color:var(--teal-600);box-shadow:0 0 0 4px rgba(13,148,136,.12)}
+  .form-error{color:var(--red-700);font-size:12.5px;margin:8px 0 0;min-height:18px;font-weight:600}
+  .form-ok{color:var(--green-700)}
+  .lic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+  .lic-box{background:var(--slate-50);border:1px solid var(--slate-200);border-radius:9px;padding:10px 12px}
+  .lic-box .k{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--slate-500);font-weight:700}
+  .lic-box .v{font-size:13.5px;font-weight:600;margin-top:2px;word-break:break-word;color:var(--navy-800)}
+  .lic-box .v .mono{font-family:Consolas,"Courier New",monospace;letter-spacing:1.4px;color:var(--teal-700)}
+  .lic-state{
+    display:flex;align-items:center;gap:9px;border-radius:10px;padding:11px 14px;
+    font-weight:700;font-size:13.5px;margin-bottom:14px;border:1px solid;
+  }
+  .lic-state.ok{background:var(--green-50);border-color:#bbf7d0;color:var(--green-700)}
+  .lic-state.warn{background:var(--amber-50);border-color:#fde68a;color:#92400e}
+  .lic-state.bad{background:var(--red-50);border-color:#fecaca;color:var(--red-700)}
+  .divider{border:none;border-top:1px solid var(--slate-200);margin:18px 0}
+  .tiny{font-size:11px;color:var(--slate-500);line-height:1.55}
+  .test-box{background:var(--slate-50);border:1px dashed var(--slate-300);border-radius:9px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+  /* ---------- Lock screen ---------- */
+  .lock{
+    position:fixed;inset:0;z-index:1000;padding:24px;
+    background:radial-gradient(1100px 620px at 50% -10%,#163b5c 0%,#0a1d2f 55%,#05111d 100%);
+    display:flex;align-items:center;justify-content:center;color:#dbeafe;
+  }
+  .lock[hidden]{display:none !important}
+  body.locked{overflow:hidden}
+  .lock-card{
+    width:min(460px,100%);
+    background:linear-gradient(180deg,#102a42,#0c2135);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:20px;padding:30px 28px 26px;text-align:center;
+    box-shadow:0 30px 90px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .lock-icon{
+    width:62px;height:62px;border-radius:16px;margin:0 auto 16px;
+    display:grid;place-items:center;color:#93e3d8;
+    background:rgba(20,184,166,.1);border:1px solid rgba(94,234,212,.28);
+  }
+  .lock-icon svg{width:30px;height:30px}
+  .lock h2{margin:0 0 6px;font-size:21px;font-weight:650;color:#f0f9ff;letter-spacing:.2px}
+  .lock-sub{font-size:12.5px;color:#8fb3ca;margin:0 0 18px}
+  .lock p.lock-msg{
+    font-size:13.5px;line-height:1.6;color:#c9dceb;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;padding:11px 13px;margin:0 0 16px;text-align:left;
+  }
+  .lock-month{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+    color:#7dd3c7;border:1px solid rgba(94,234,212,.3);
+    background:rgba(20,184,166,.08);border-radius:999px;padding:4px 12px;margin-bottom:15px;
+  }
+  .lock-id-row{
+    display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    font-size:11.5px;color:#8fb3ca;margin:-5px 0 15px;
+  }
+  .lock-id-row b{
+    font-family:Consolas,"Courier New",monospace;font-size:13.5px;letter-spacing:1.6px;
+    color:#b9f3e8;font-weight:700;
+  }
+  .copy-mini{
+    border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#cfe6f4;
+    font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+    padding:3px 8px;border-radius:6px;cursor:pointer;
+  }
+  .copy-mini:hover{background:rgba(255,255,255,.15)}
+  .lic-box .v .copy-mini{color:var(--slate-600);background:var(--slate-100);border-color:var(--slate-300);margin-left:8px;vertical-align:middle}
+  .lic-box .v .copy-mini:hover{background:var(--slate-200)}
+  .lock form{display:flex;flex-direction:column;gap:10px}
+  .lock .code-input{
+    background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18);
+    color:#fff;letter-spacing:4px;
+  }
+  .lock .code-input::placeholder{color:#5d7f97;letter-spacing:2px}
+  .lock .code-input:focus{border-color:#14b8a6;box-shadow:0 0 0 4px rgba(20,184,166,.15)}
+  .lock .btn-primary{padding:11px;font-size:14px;border-radius:10px}
+  .lock-error{color:#fca5a5;font-size:12.5px;font-weight:600;min-height:18px;margin:2px 0 0}
+  .lock-help{font-size:11.5px;color:#7f9db2;margin:16px 0 0;line-height:1.6}
+  .lock-help b{color:#b8d4e5;font-weight:600}
+  .lock-meta{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:#527189;margin:14px 0 0}
+  .lock .test-link{background:none;border:none;color:#527189;font-size:10.5px;text-decoration:underline;cursor:pointer;margin-top:10px}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;right:20px;bottom:20px;z-index:1200;
+    background:#0f2a42;color:#e8f1f8;font-size:13px;font-weight:500;
+    padding:11px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 16px 40px rgba(2,10,20,.35);
+    opacity:0;transform:translateY(10px);pointer-events:none;
+    transition:opacity .2s,transform .2s;max-width:min(380px,90vw);
+  }
+  .toast.show{opacity:1;transform:none}
+  .toast.error{background:#7f1d1d;border-color:#b91c1c}
+  .toast.success{background:#14532d;border-color:#15803d}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:980px){
+    .stats{grid-template-columns:repeat(3,1fr)}
+    .brand h1{font-size:17px}
+  }
+  @media (max-width:640px){
+    .container{padding:16px 12px 8px}
+    .input-card{padding:16px}
+    .stats{grid-template-columns:repeat(2,1fr);gap:9px}
+    .stat .n{font-size:21px}
+    .app-bar{padding:12px 14px}
+    .app-actions{width:100%;justify-content:space-between}
+    .toolbar{gap:8px}
+    .toolbar .spacer{display:none}
+    .toolbar .btn{flex:1 1 40%}
+    .label-grid{grid-template-columns:120px 1fr;font-size:13px}
+    body.fixed-size .label-card{width:100%;height:auto;min-height:0}
+    .field-row,.lic-grid{grid-template-columns:1fr}
+    .modal{padding:10px}
+  }
+  @media (min-width:981px){
+    .labels-wrapper{grid-template-columns:1fr 1fr;align-items:start}
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    body{margin:0;background:#fff;overflow:visible}
+    .app-bar,.input-card,.stats,.banner,.license-warn,.app-footer,.modal,.lock,.toast,
+    .screen-only,.no-print,.empty{display:none !important}
+    .container{max-width:none;margin:0;padding:0}
+    .labels-wrapper{display:block !important;gap:0;padding:0}
+    .label-card{
+      border:2px solid #000;border-radius:0;box-shadow:none;
+      margin:0;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    }
+    body.fixed-size .label-card{
+      width:var(--label-w);height:var(--label-h);
+      box-sizing:border-box;overflow:hidden;
+    }
+    .label-card + .label-card{break-before:page;page-break-before:always}
+    body.multi .label-card + .label-card{break-before:auto;page-break-before:auto;margin-top:8mm}
+    .label-val.missing{color:#000}
+    .status-pill{color:#000 !important;background:#fff !important;border-color:#000 !important}
+    .sign-line{border-bottom-color:#000}
+    body.small .issue-badges{display:none}
+    body.locked #app{display:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="app-bar no-print">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3 4.5 6v6c0 4.4 3.2 8.1 7.5 8.9 4.3-.8 7.5-4.5 7.5-8.9V6L12 3Z"/>
+          <path d="m8.8 12.2 2.1 2.1 4.3-4.6"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Raw Material Label System</h1>
+        <p class="subtitle">Pharmaceutical GMP &middot; Bulk Barcode Printing</p>
+      </div>
+    </div>
+    <div class="app-actions">
+      <span class="chip" id="licenseChip"><span class="dot"></span> Checking licence</span>
+      <button class="btn" id="licenseBtn" type="button" title="Licence details">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Licence
+      </button>
+      <button class="btn" id="settingsBtn" type="button" title="Label and application settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H7a1.7 1.7 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V7a1.7 1.7 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+        Settings
+      </button>
+      <button class="btn btn-primary" id="installBtn" type="button" hidden title="Install this app on this device">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Install
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card input-card no-print">
+      <h2 class="card-title">Scan / paste material data <span class="tag">Auto parse</span></h2>
+      <p class="hint">Scan any number of barcodes in succession, or paste the scan data. Labels are generated automatically. <button class="link-btn" id="sampleBtn" type="button">Load sample data</button></p>
+      <textarea id="scanInput" placeholder="Scan or paste barcode data here..." spellcheck="false" autofocus></textarea>
+      <div class="input-meta">
+        <span class="scan-count" id="scanCount">0 characters</span>
+        <span class="scan-count">Fields read: material code, name, batch, mfg, expiry, drum, manufacturer, storage</span>
+      </div>
+      <div class="toolbar">
+        <div class="sel-wrap">
+          <label for="sizeSel">Print size</label>
+          <select id="sizeSel">
+            <option value="100x150">Standard &middot; 100 &times; 150 mm (4 &times; 6 in)</option>
+            <option value="a4">A4 &middot; 1 label / page</option>
+            <option value="a4multi">A4 &middot; multiple labels</option>
+            <option value="100x100">Label 100 &times; 100 mm (4 &times; 4 in)</option>
+            <option value="100x75">Label 100 &times; 75 mm (4 &times; 3 in)</option>
+          </select>
+        </div>
+        <div class="sel-wrap">
+          <label for="statusSel">Material status</label>
+          <select id="statusSel">
+            <option value="quarantine">Quarantine</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="testing">Under test</option>
+          </select>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn btn-success" id="printBtn" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>
+          Print all labels
+        </button>
+        <button class="btn btn-danger" id="clearBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          Clear
+        </button>
+      </div>
+    </section>
+
+    <div class="license-warn" id="licenseWarn" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      <span id="licenseWarnText"></span>
+    </div>
+
+    <section class="stats" aria-label="Label summary">
+      <div class="stat total"><div class="n" id="statTotal">0</div><div class="l">Scanned</div><div class="s">total records</div></div>
+      <div class="stat ready"><div class="n" id="statReady">0</div><div class="l">Ready</div><div class="s">ready to print</div></div>
+      <div class="stat incomplete"><div class="n" id="statIncomplete">0</div><div class="l">Incomplete</div><div class="s">excluded from print</div></div>
+      <div class="stat expired"><div class="n" id="statExpired">0</div><div class="l">Expired</div><div class="s">do not issue</div></div>
+      <div class="stat near"><div class="n" id="statNear">0</div><div class="l">Expiring soon</div><div class="s" id="statNearSub">within 90 days</div></div>
+    </section>
+
+    <div class="banner" id="banner"></div>
+
+    <section class="labels-wrapper" id="labelsWrapper" aria-live="polite"></section>
+  </main>
+
+  <footer class="app-footer no-print">
+    <span>Raw Material Label System v2.4.0</span>
+    <span class="sep">&middot;</span>
+    <span id="footerCompany">Quality Assurance</span>
+    <span class="sep">&middot;</span>
+    <span>&copy; <span id="footerYear">2026</span></span>
+    <span class="sep">&middot;</span>
+    <span>Licensed build</span>
+  </footer>
+</div>
+
+<!-- ================= LOCK SCREEN ================= -->
+<div class="lock" id="lockScreen" hidden>
+  <div class="lock-card">
+    <div class="lock-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.4"/></svg>
+    </div>
+    <h2>Access period ended</h2>
+    <p class="lock-sub">Raw Material Label System &middot; Secure access</p>
+    <p class="lock-msg" id="lockMsg">Enter this month's activation code to continue.</p>
+    <div class="lock-month" id="lockMonth">Required code</div>
+    <div class="lock-id-row">
+      <span>Your License ID</span>
+      <b id="lockLicId">----</b>
+      <button class="copy-mini" id="lockCopyId" type="button">Copy</button>
+    </div>
+    <form id="unlockForm" autocomplete="off">
+      <input class="code-input" id="unlockCode" type="text" inputmode="text" maxlength="14" placeholder="XXXX-XXXX-XXXX" aria-label="Monthly activation code" spellcheck="false">
+      <button class="btn btn-primary" type="submit" id="unlockBtn">Unlock 30 days</button>
+    </form>
+    <p class="lock-error" id="lockError" role="alert"></p>
+    <p class="lock-help">Need this month's code?<br>Contact <b id="lockContact">your software supplier</b></p>
+    <p class="lock-meta" id="lockMeta">Version 2.4.0</p>
+  </div>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal" id="settingsModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h3 id="settingsTitle">Label &amp; application settings</h3>
+      <button class="icon-btn" type="button" data-close="settingsModal" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="setCompany">Company / plant name</label>
+        <input id="setCompany" type="text" maxlength="60" placeholder="e.g. Sunrise Pharmaceuticals Ltd.">
+        <div class="desc">Printed at the top of every label.</div>
+      </div>
+      <div class="field">
+        <label for="setNote">Label footer note</label>
+        <input id="setNote" type="text" maxlength="80" placeholder="For internal use only">
+        <div class="desc">Shown above the signature line on each label.</div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="setNearDays">Near-expiry warning (days)</label>
+          <input id="setNearDays" type="number" min="1" max="365" step="1" value="90">
+        </div>
+        <div class="field">
+          <label for="setStatus">Default material status</label>
+          <select id="setStatus">
+            <option value="quarantine">Quarantine</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="testing">Under test</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="setContact">Licence renewal contact</label>
+        <input id="setContact" type="text" maxlength="80" placeholder="e.g. QA IT Support - 98765 43210">
+        <div class="desc">Shown on the lock screen when the 30-day period ends.</div>
+      </div>
+      <p class="tiny">Settings are stored only on this computer. They are never uploaded anywhere.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" data-close="settingsModal">Cancel</button>
+      <button class="btn btn-primary" type="button" id="saveSettingsBtn">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LICENCE MODAL ================= -->
+<div class="modal" id="licenseModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="licTitle">
+    <div class="modal-head">
+      <h3 id="licTitle">Licence &amp; activation</h3>
+      <button class="icon-btn" type="button" data-close="licenseModal" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="lic-state ok" id="licState"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:currentColor"></span><span id="licStateText">Checking licence</span></div>
+      <div class="lic-grid">
+        <div class="lic-box"><div class="k">Access valid until</div><div class="v" id="licExpiry">&mdash;</div></div>
+        <div class="lic-box"><div class="k">Days remaining</div><div class="v" id="licDays">&mdash;</div></div>
+        <div class="lic-box"><div class="k">Code required for</div><div class="v" id="licCodeMonth">&mdash;</div></div>
+        <div class="lic-box"><div class="k">Your License ID</div><div class="v"><span id="licKeySet" class="mono">&mdash;</span><button class="copy-mini" id="licIdCopy" type="button">Copy</button></div></div>
+      </div>
+      <div class="field">
+        <label for="licCode">Enter activation code</label>
+        <input class="code-input" id="licCode" type="text" maxlength="14" placeholder="XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+        <div class="desc">Codes are generated for your License ID. Send this ID to your supplier to receive the code for <b id="licCodeMonth2">this month</b>.</div>
+      </div>
+      <button class="btn btn-primary" type="button" id="licActivateBtn" style="width:100%">Activate / renew 30 days</button>
+      <p class="form-error" id="licError" role="alert"></p>
+      <hr class="divider">
+      <div class="test-box">
+        <div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--slate-700)">Test the lock screen</div>
+          <div class="tiny">Expires this period now. To unlock again, use a code from your supplier.</div>
+        </div>
+        <button class="btn btn-sm" type="button" id="simulateBtn">Test lock</button>
+      </div>
+      <p class="tiny" style="margin-top:14px">This licence is stored on this computer only. Monthly codes are generated for your License ID and each code can be used once. Keep your renewal contact details up to date in Settings.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" type="button" data-close="licenseModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   Raw Material Label System v2.4.0
+   Monthly activation-code protection (30-day period)
+   Owner key generator: license_key_generator.html
+   ============================================================ */
+
+const APP_VERSION = '2.4.0';
+const PERIOD_DAYS = 30;
+const WARN_DAYS = 5;
+/* Free evaluation period on a brand-new install. Set to 0 to require a code
+   from the very first launch. */
+const TRIAL_DAYS = 30;
+const CLOCK_TOLERANCE = 6 * 60 * 60 * 1000;
+const LS = {
+  lic: 'rmls.lic.v2',
+  bak: 'rmls.lic.b2',
+  settings: 'rmls.settings.v2',
+  size: 'labelPrintSize.v24'
+};
+
+/* Licence-state signing key. Also validates licences written by older builds. */
+const SECRET = String.fromCharCode(82,77,76,83,45,80,72,65,82,77,65,45,75,69,89,45,50,48,50,54) + '|v2|K7q2';
+
+/* Per-customer activation-code key. Must stay identical to license_keygen.html. */
+const SITE_SECRET = [121,102,103,108,4,4,122,104,4,4,25,27,25,29,4,4,18,77,31,72,26,73,28,78,30,79,25,74,4,4,106,115,30,25]
+  .map(c => String.fromCharCode(c ^ 0x2b)).join('');
+
+const STATUSES = {
+  quarantine: { label: 'QUARANTINE', cls: 'quarantine' },
+  approved:   { label: 'APPROVED',   cls: 'approved' },
+  rejected:   { label: 'REJECTED',   cls: 'rejected' },
+  testing:    { label: 'UNDER TEST', cls: 'testing' }
+};
+
+/* ---------- Small helpers ---------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function uid() {
+  return 'n' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
+/* Synchronous SHA-256 (ASCII input only) */
+function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii.length * 8;
+  let hash = sha256.h = sha256.h || [];
+  let k = sha256.k = sha256.k || [];
+  let primeCounter = k.length;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+  ascii += '\x80';
+  while (ascii.length % 64 - 56) ascii += '\x00';
+  for (let i = 0; i < ascii.length; i++) {
+    const j = ascii.charCodeAt(i);
+    if (j >> 8) return '';
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words.length] = ((asciiBitLength / maxWord) | 0);
+  words[words.length] = (asciiBitLength);
+  for (let j = 0; j < words.length;) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (let i = 0; i < 64; i++) {
+      const w15 = w[i - 15];
+      const w2 = w[i - 2];
+      const a = hash[0];
+      const e = hash[4];
+      const temp1 = (hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0)) | 0;
+      const temp2 = ((rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]))) | 0;
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (let i = 0; i < 8; i++) {
+    for (let j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+function monthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function ymOf(d) {
+  return d.getFullYear() * 100 + d.getMonth() + 1;
+}
+
+function licenseId() {
+  const install = lic.state && lic.state.install;
+  if (!install) return '\u2014';
+  const h = sha256('RMLS-SITE-V1|' + install).slice(0, 8).toUpperCase();
+  return h.slice(0, 4) + '-' + h.slice(4);
+}
+
+function siteCodeFor(ym) {
+  const id = licenseId().replace('-', '');
+  if (id.length !== 8) return '';
+  const h = sha256(SITE_SECRET + '|' + id + '|' + ym + '|RMLG1').slice(0, 12).toUpperCase();
+  return h.slice(0, 4) + '-' + h.slice(4, 8) + '-' + h.slice(8, 12);
+}
+
+function monthName(d) {
+  return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+}
+
+function fmtDate(ts) {
+  return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function normalizeCode(v) {
+  return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function formatCodeInput(v) {
+  const raw = normalizeCode(v).slice(0, 12);
+  return raw.replace(/(.{4})(?=.)/g, '$1-');
+}
+
+/* ============================================================
+   Local storage + IndexedDB mirror for licence state
+   ============================================================ */
+let dbPromise = null;
+
+function idbOpen() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise(resolve => {
+    try {
+      const req = indexedDB.open('rmls.secure.store', 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+      req.onblocked = () => resolve(null);
+    } catch (e) {
+      resolve(null);
+    }
+  });
+  return dbPromise;
+}
+
+async function idbGetLicense() {
+  const db = await idbOpen();
+  if (!db) return null;
+  return new Promise(resolve => {
+    try {
+      const rq = db.transaction('meta', 'readonly').objectStore('meta').get('license');
+      rq.onsuccess = () => resolve(rq.result || null);
+      rq.onerror = () => resolve(null);
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+function idbPutLicense(value) {
+  idbOpen().then(db => {
+    if (!db) return;
+    try {
+      db.transaction('meta', 'readwrite').objectStore('meta').put(value, 'license');
+    } catch (e) { /* mirror is best-effort */ }
+  });
+}
+
+/* ============================================================
+   Licence engine
+   ============================================================ */
+const lic = {
+  state: null,
+  invalid: false,
+  lockVisible: false,
+  attempts: 0,
+  cooldownUntil: 0,
+  lastSaved: 0
+};
+
+function licSignature(s) {
+  return sha256(SECRET + '|LIC|' + s.install + '|' + s.periodStart + '|' + s.expires +
+    '|' + (s.codeMonth || '-') + '|' + (Array.isArray(s.used) ? s.used.join(',') : '')).slice(0, 20);
+}
+
+function licVerify(s) {
+  if (!s || !s.install || typeof s.expires !== 'number' || !s.sig) return false;
+  if (s.sig === licSignature(s)) return true;
+  /* Accept licences issued by v2.0.0 (signature without month / used-code list) */
+  return s.sig === sha256(SECRET + '|LIC|' + s.install + '|' + s.periodStart + '|' + s.expires).slice(0, 20);
+}
+
+function saveLicense() {
+  if (!lic.state) return;
+  lic.state.sig = licSignature(lic.state);
+  const raw = JSON.stringify(lic.state);
+  try {
+    localStorage.setItem(LS.lic, raw);
+    localStorage.setItem(LS.bak, raw);
+  } catch (e) { /* private mode */ }
+  idbPutLicense(lic.state);
+}
+
+function readLicenseLocal() {
+  for (const key of [LS.lic, LS.bak]) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const s = JSON.parse(raw);
+      if (s && typeof s.expires === 'number') return s;
+    } catch (e) { /* ignore corrupted copy */ }
+  }
+  return null;
+}
+
+async function loadLicense() {
+  let s = readLicenseLocal();
+  if (!s) s = await idbGetLicense();
+
+  if (s && !licVerify(s)) {
+    lic.invalid = true;
+    lic.state = s;
+    return;
+  }
+  if (s) {
+    lic.state = s;
+    if (!Array.isArray(s.used)) s.used = [];
+    if (s.codeMonth === undefined) s.codeMonth = null;
+    const now = Date.now();
+    if (now > (s.lastSeen || 0)) {
+      s.lastSeen = now;
+      saveLicense();
+    }
+    return;
+  }
+  const now = Date.now();
+  lic.state = {
+    v: 3,
+    install: uid(),
+    periodStart: now,
+    expires: TRIAL_DAYS > 0 ? now + TRIAL_DAYS * 864e5 : 0,
+    lastSeen: now,
+    codeMonth: null,
+    used: [],
+    trial: TRIAL_DAYS > 0
+  };
+  saveLicense();
+}
+
+function licenseStatus(now) {
+  now = now || Date.now();
+  const s = lic.state;
+  if (!s) {
+    return { valid: false, reason: 'missing', days: 0, expires: 0, integrity: false, tamper: false, expired: true, month: monthKey(new Date(now)) };
+  }
+  const tamper = now < (s.lastSeen || 0) - CLOCK_TOLERANCE;
+  const expired = !s.expires || now >= s.expires;
+  const integrity = !lic.invalid;
+  return {
+    valid: integrity && !tamper && !expired,
+    expired,
+    tamper,
+    integrity,
+    days: Math.max(0, Math.ceil((s.expires - now) / 864e5)),
+    expires: s.expires,
+    month: monthKey(new Date(now)),
+    trial: !!s.trial
+  };
+}
+
+function tryUnlock(input) {
+  const now = Date.now();
+  if (now < lic.cooldownUntil) {
+    return { ok: false, error: 'Too many attempts. Please wait ' + Math.ceil((lic.cooldownUntil - now) / 1000) + ' seconds.' };
+  }
+  const norm = normalizeCode(input);
+  if (norm.length !== 12) {
+    return { ok: false, error: 'Enter the complete 12-character activation code.' };
+  }
+  const today = new Date(now);
+  const next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  const candidates = [
+    { key: monthKey(today), code: siteCodeFor(ymOf(today)) },
+    { key: monthKey(next),  code: siteCodeFor(ymOf(next)) }
+  ];
+  let matched = null;
+  for (const c of candidates) {
+    if (norm === normalizeCode(c.code)) { matched = c.key; break; }
+  }
+  if (!matched) {
+    lic.attempts++;
+    if (lic.attempts >= 5) {
+      lic.attempts = 0;
+      lic.cooldownUntil = now + 60000;
+      startCooldownTimer();
+      return { ok: false, error: 'Too many incorrect attempts. Try again in 60 seconds.' };
+    }
+    return {
+      ok: false,
+      error: 'Invalid code for ' + monthName(today) + '. Make sure the code was generated for License ID ' + licenseId() + '.'
+    };
+  }
+  const prev = lic.state || {};
+  const used = Array.isArray(prev.used) ? prev.used : [];
+  if (used.indexOf(matched) !== -1) {
+    const stillValid = prev.expires > now;
+    return {
+      ok: false,
+      error: 'This code has already been used on this computer. ' +
+        (stillValid ? 'Access is valid until ' + fmtDate(prev.expires) + '.'
+                    : 'Please request the activation code for the next month.')
+    };
+  }
+  const base = Math.max(now, +prev.expires || 0);
+  lic.state = {
+    v: 3,
+    install: prev.install || uid(),
+    periodStart: now,
+    expires: base + PERIOD_DAYS * 864e5,
+    lastSeen: now,
+    codeMonth: matched,
+    used: used.concat(matched).slice(-24),
+    trial: false
+  };
+  lic.invalid = false;
+  lic.attempts = 0;
+  lic.cooldownUntil = 0;
+  saveLicense();
+  return { ok: true, expires: lic.state.expires, month: matched };
+}
+
+function startCooldownTimer() {
+  const el = document.getElementById('lockError');
+  const tick = () => {
+    const left = Math.ceil((lic.cooldownUntil - Date.now()) / 1000);
+    if (left > 0) {
+      if (el) el.textContent = 'Too many incorrect attempts. Try again in ' + left + 's.';
+      setTimeout(tick, 500);
+    } else if (el) {
+      el.textContent = '';
+    }
+  };
+  tick();
+}
+
+/* ============================================================
+   Settings
+   ============================================================ */
+const DEFAULT_SETTINGS = {
+  company: '',
+  note: 'For internal use only',
+  nearDays: 90,
+  status: 'quarantine',
+  contact: ''
+};
+
+function loadSettings() {
+  const s = Object.assign({}, DEFAULT_SETTINGS);
+  try {
+    const raw = localStorage.getItem(LS.settings);
+    if (raw) Object.assign(s, JSON.parse(raw));
+  } catch (e) { /* ignore */ }
+  s.nearDays = Math.min(365, Math.max(1, parseInt(s.nearDays, 10) || 90));
+  if (!STATUSES[s.status]) s.status = 'quarantine';
+  return s;
+}
+
+function persistSettings() {
+  try { localStorage.setItem(LS.settings, JSON.stringify(settings)); } catch (e) { /* ignore */ }
+}
+
+let settings = loadSettings();
+
+/* ============================================================
+   DOM references
+   ============================================================ */
+const scanInput = document.getElementById('scanInput');
+const labelsWrapper = document.getElementById('labelsWrapper');
+const printBtn = document.getElementById('printBtn');
+const clearBtn = document.getElementById('clearBtn');
+const sizeSel = document.getElementById('sizeSel');
+const statusSel = document.getElementById('statusSel');
+const banner = document.getElementById('banner');
+const licenseChip = document.getElementById('licenseChip');
+const licenseWarn = document.getElementById('licenseWarn');
+const licenseWarnText = document.getElementById('licenseWarnText');
+const lockScreen = document.getElementById('lockScreen');
+const lockMsg = document.getElementById('lockMsg');
+const lockMonth = document.getElementById('lockMonth');
+const lockContact = document.getElementById('lockContact');
+const lockError = document.getElementById('lockError');
+const unlockCode = document.getElementById('unlockCode');
+const unlockForm = document.getElementById('unlockForm');
+const settingsModal = document.getElementById('settingsModal');
+const licenseModal = document.getElementById('licenseModal');
+const toastEl = document.getElementById('toast');
+const installBtn = document.getElementById('installBtn');
+
+let debounceTimer = null;
+let toastTimer = null;
+let lastStats = { printable: 0, expired: 0 };
+
+/* ============================================================
+   Licence UI
+   ============================================================ */
+function refreshLicenseUI() {
+  const st = licenseStatus();
+
+  licenseChip.classList.remove('warn', 'danger');
+  if (!st.integrity) {
+    licenseChip.classList.add('danger');
+    licenseChip.innerHTML = '<span class="dot"></span> Licence error';
+  } else if (st.tamper) {
+    licenseChip.classList.add('danger');
+    licenseChip.innerHTML = '<span class="dot"></span> Date check failed';
+  } else if (st.expired) {
+    licenseChip.classList.add('danger');
+    licenseChip.innerHTML = '<span class="dot"></span> Access expired';
+  } else if (st.days <= WARN_DAYS) {
+    licenseChip.classList.add('warn');
+    licenseChip.innerHTML = '<span class="dot"></span> ' + st.days + ' day' + (st.days === 1 ? '' : 's') + ' left';
+  } else {
+    licenseChip.innerHTML = '<span class="dot"></span> Active &middot; ' + st.days + ' days';
+  }
+
+  if (st.valid && st.days <= WARN_DAYS) {
+    licenseWarn.hidden = false;
+    licenseWarnText.innerHTML = '<b>Access expires in ' + st.days + ' day' + (st.days === 1 ? '' : 's') +
+      '</b> (on ' + fmtDate(st.expires) + '). Enter this month\'s activation code before expiry to avoid interruption.';
+  } else {
+    licenseWarn.hidden = true;
+  }
+
+  if (st.valid) hideLock();
+  else showLock(st);
+
+  if (!licenseModal.hidden) fillLicenseModal(st);
+}
+
+function showLock(st) {
+  if (!lic.lockVisible) {
+    lic.lockVisible = true;
+    document.body.classList.add('locked');
+    const app = document.getElementById('app');
+    if ('inert' in app) app.inert = true;
+    lockScreen.hidden = false;
+    setTimeout(() => { try { unlockCode.focus(); } catch (e) {} }, 80);
+  }
+  if (!st.integrity) {
+    lockMsg.textContent = "The stored licence data could not be verified. This can happen after manual changes to application data. Enter this month's activation code to restore access.";
+  } else if (st.tamper) {
+    lockMsg.textContent = "The system date or time appears to have been changed. For security, access stays locked until a valid activation code is entered.";
+  } else if (st.expired) {
+    lockMsg.textContent = st.expires
+      ? 'Your 30-day access period ended on ' + fmtDate(st.expires) + '. Enter the activation code for ' + monthName(new Date()) + ' generated for your License ID below.'
+      : 'Enter the activation code for ' + monthName(new Date()) + ' generated for your License ID below.';
+  } else {
+    lockMsg.textContent = "Enter this month's activation code to continue.";
+  }
+  lockMonth.textContent = 'Required code: ' + monthName(new Date());
+  document.getElementById('lockLicId').textContent = licenseId();
+  lockContact.textContent = settings.contact || 'your software supplier';
+  document.getElementById('lockMeta').textContent =
+    (st.expires ? 'Last period ended ' + fmtDate(st.expires) + ' \u00b7 ' : '') + 'Version ' + APP_VERSION;
+}
+
+function hideLock() {
+  if (!lic.lockVisible) return;
+  lic.lockVisible = false;
+  document.body.classList.remove('locked');
+  lockScreen.hidden = true;
+  const app = document.getElementById('app');
+  if ('inert' in app) app.inert = false;
+  unlockCode.value = '';
+  lockError.textContent = '';
+}
+
+function fillLicenseModal(st) {
+  st = st || licenseStatus();
+  const s = lic.state || {};
+  const stateEl = document.getElementById('licState');
+  const stateText = document.getElementById('licStateText');
+  stateEl.classList.remove('ok', 'warn', 'bad');
+
+  if (!st.integrity) {
+    stateEl.classList.add('bad');
+    stateText.textContent = 'Licence data error - activation required';
+  } else if (st.tamper) {
+    stateEl.classList.add('bad');
+    stateText.textContent = 'System date/time check failed - activation required';
+  } else if (st.expired) {
+    stateEl.classList.add('bad');
+    stateText.textContent = 'Access period ended - activation required';
+  } else if (st.days <= WARN_DAYS) {
+    stateEl.classList.add('warn');
+    stateText.textContent = (st.trial ? 'Trial active' : 'Licence active') + ' - expires soon';
+  } else {
+    stateEl.classList.add('ok');
+    stateText.textContent = (st.trial ? 'Trial active' : 'Licence active') + ' - protected';
+  }
+
+  document.getElementById('licExpiry').textContent = s.expires ? fmtDate(s.expires) : '\u2014';
+  document.getElementById('licDays').textContent = st.days + ' day' + (st.days === 1 ? '' : 's');
+  document.getElementById('licCodeMonth').textContent = monthName(new Date());
+  document.getElementById('licCodeMonth2').textContent = monthName(new Date());
+  document.getElementById('licKeySet').textContent = licenseId();
+}
+
+/* ============================================================
+   Parsing engine (unchanged behaviour)
+   ============================================================ */
+const LABELS = {
+  code:  'Product Identification Code|Product code|Material Code|Item Code',
+  name:  'Name of the API|API Name|Material Name|(?<!Supplier\\s)(?<!Vendor\\s)(?<!Manufacturer\\s)(?<!Brand\\s)(?<!Trade\\s)(?<!Product\\s)(?<!Company\\s)(?<!Unit\\s)Name',
+  ar:    'A\\.?R\\.?\\s*No\\.?|Analysis Report No\\.?|Analysis No\\.?',
+  batch: 'Batch\\s*No\\.?|Lot\\s*No\\.?|Batch',
+  mfg:   'Mfg\\.?\\s*Dt\\.?|Mfg\\.?\\s*Date|DOM',
+  exp:   'Expiry\\s*Dt\\.?|Expiry\\s*Date|Exp\\.?\\s*Dt\\.?|DOE',
+  retest:'Retest\\s*(?:Dt\\.?|Date)|Re-?test\\s*(?:Dt\\.?|Date)',
+  drum:  'Drum\\s*No\\.?|Container\\s*No\\.?',
+  qty:   'Net\\s*(?:Qty|Wt|Weight)|Quantity|Qty',
+  mfr:   'Manufacturer(?:\\s*Name)?',
+  sup:   'Supplier(?:\\s*Name)?|Vendor(?:\\s*Name)?',
+  stor:  'Storage(?:\\s*Cond(?:itions?)?\\.?)?'
+};
+const STOP_LABELS = 'Licen[cs]e|TEL|Phone|Address|E-?mail|Website';
+const ALL_LABELS = Object.values(LABELS).concat(STOP_LABELS).join('|');
+const CRITICAL = ['code', 'name', 'batch', 'exp'];
+const CRITICAL_NAMES = { code: 'material code', name: 'material name', batch: 'batch no', exp: 'expiry date' };
+const DEBOUNCE_MS = 500;
+
+function field(block, key) {
+  const stopNewline = key === 'stor' ? '' : '|\\r?\\n';
+  const re = new RegExp(
+    '\\b(?:' + LABELS[key] + ')\\s*:\\s*([\\s\\S]*?)(?=\\s*[,;|]?\\s*\\b(?:' + ALL_LABELS + ')\\s*:' + stopNewline + '|$)',
+    'i'
+  );
+  const m = block.match(re);
+  let v = m ? m[1].replace(/\s+/g, ' ') : '';
+  if (key === 'stor') v = v.replace(/\s*(?:\bLicen[cs]e\b|\bTEL\b|\bAndhra\b|\b\d{6}\b).*$/i, '');
+  return v.replace(/^[\s,;|]+|[\s,;|]+$/g, '');
+}
+
+const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+
+function validDate(y, m, d) {
+  const dt = new Date(y, m, d);
+  return (dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d) ? dt : null;
+}
+
+function parseDate(s, endOfMonth) {
+  if (!s) return null;
+  s = s.trim();
+  let m, y;
+  if ((m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/))) {
+    y = +m[3]; if (y < 100) y += 2000;
+    return validDate(y, +m[2] - 1, +m[1]);
+  }
+  if ((m = s.match(/^(\d{4})[\/.\-](\d{1,2})[\/.\-](\d{1,2})$/))) {
+    return validDate(+m[1], +m[2] - 1, +m[3]);
+  }
+  if ((m = s.match(/^(\d{1,2})[\/.\-](\d{2,4})$/))) {
+    y = +m[2]; if (y < 100) y += 2000;
+    const mo = +m[1];
+    if (mo < 1 || mo > 12) return null;
+    return endOfMonth ? new Date(y, mo, 0) : new Date(y, mo - 1, 1);
+  }
+  if ((m = s.match(/^(?:(\d{1,2})[\s\-\/.]*)?([A-Za-z]{3,9})[\s\-\/,.]*(\d{2,4})$/))) {
+    const mo = MONTHS[m[2].slice(0, 3).toLowerCase()];
+    if (mo === undefined) return null;
+    y = +m[3]; if (y < 100) y += 2000;
+    if (m[1]) return validDate(y, mo, +m[1]);
+    return endOfMonth ? new Date(y, mo + 1, 0) : new Date(y, mo, 1);
+  }
+  return null;
+}
+
+function analyse(raw) {
+  const out = { items: [], dups: 0, junk: 0 };
+  if (!raw) return out;
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const blocks = raw.split(/(?=\b(?:Product Identification Code|Product code)\s*:)/i);
+  const seen = new Set();
+  const nearDays = settings.nearDays;
+
+  blocks.forEach(b => {
+    b = b.trim();
+    if (b.length < 5) return;
+
+    const d = {};
+    for (const k in LABELS) d[k] = field(b, k);
+    if (!Object.values(d).some(Boolean)) { out.junk++; return; }
+
+    const key = b.toLowerCase().replace(/\s+/g, ' ');
+    if (seen.has(key)) { out.dups++; return; }
+    seen.add(key);
+
+    const expDateP = parseDate(d.exp, true);
+    const retDateP = parseDate(d.retest, true);
+    const dueDate = expDateP || retDateP;
+    const isRetest = !expDateP && !!retDateP;
+    const expired = !!dueDate && dueDate < today;
+    const near = !!dueDate && !expired && ((dueDate - today) / 864e5) <= nearDays;
+    const badDate = !!(d.exp && !expDateP) || !!(d.retest && !retDateP);
+
+    let missing = CRITICAL.filter(k => !d[k]);
+    if (d.retest) missing = missing.filter(k => k !== 'exp');
+
+    out.items.push({ d, missing, expired, near, badDate, isRetest, incomplete: missing.length > 0 });
+  });
+  return out;
+}
+
+/* ============================================================
+   Rendering
+   ============================================================ */
+function render(res) {
+  const stamp = new Date().toLocaleString('en-IN', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  const total = res.items.length;
+  const st = STATUSES[statusSel.value] || STATUSES.quarantine;
+  let html = '';
+
+  res.items.forEach((it, i) => {
+    const d = it.d;
+    const cell = (v, strong, key) => {
+      if (v) return '<div class="label-val' + (strong ? ' strong' : '') + '">' + esc(v) + '</div>';
+      return (key && CRITICAL.includes(key))
+        ? '<div class="label-val missing">&#9888; MISSING</div>'
+        : '<div class="label-val dash">&mdash;</div>';
+    };
+
+    const rows = [
+      ['Material Code', d.code, 'code', false],
+      ['Material Name', d.name, 'name', true]
+    ];
+    if (d.ar) rows.push(['A.R. No.', d.ar, 'ar', false]);
+    rows.push(['Batch No.', d.batch, 'batch', true]);
+    rows.push(['Mfg. Date', d.mfg, 'mfg', false]);
+    rows.push([it.isRetest ? 'Retest Date' : 'Expiry Date', d.exp || d.retest, 'exp', true]);
+    if (d.exp && d.retest) rows.push(['Retest Date', d.retest, 'retest', false]);
+    rows.push(['Drum / Pkg No.', d.drum, 'drum', false]);
+    if (d.qty) rows.push(['Net Qty', d.qty, 'qty', false]);
+    rows.push(['Manufacturer', d.mfr, 'mfr', false]);
+    if (d.sup) rows.push(['Supplier', d.sup, 'sup', false]);
+    rows.push(['Storage Cond.', d.stor, 'stor', false]);
+
+    const grid = rows.map(r =>
+      '<div class="label-key">' + r[0] + '</div>' + cell(r[1], r[3], r[2])).join('');
+
+    let badges = '';
+    if (it.incomplete) {
+      badges += '<span class="badge red">INCOMPLETE &mdash; not printed (missing: ' +
+        it.missing.map(k => CRITICAL_NAMES[k] || k).join(', ') + ')</span>';
+    }
+    if (it.expired) badges += '<span class="badge red">' + (it.isRetest ? 'RETEST OVERDUE' : 'EXPIRED') + '</span>';
+    if (it.near) badges += '<span class="badge amber">' + (it.isRetest ? 'Retest' : 'Expiry') +
+      ' within ' + settings.nearDays + ' days</span>';
+    if (it.badDate) badges += '<span class="badge grey">Date format not recognised &mdash; verify manually</span>';
+
+    html += `
+      <div class="label-card${it.incomplete ? ' incomplete no-print' : ''}">
+        ${badges ? '<div class="screen-only issue-badges">' + badges + '</div>' : ''}
+        ${it.expired ? '<div class="stamp-wrap"><span class="stamp">' + (it.isRetest ? 'RETEST DUE' : 'EXPIRED') + '</span></div>' : ''}
+        <div class="label-head">
+          <div class="label-company">${esc(settings.company || 'Pharmaceutical Quality Control')}</div>
+          <div class="label-title">Raw Material Identification Label</div>
+          <div class="label-sub">Material Receipt &middot; Quality Assurance</div>
+        </div>
+        <div class="label-grid">${grid}</div>
+        <div class="label-status-row">
+          <span class="label-key">Material Status</span>
+          <span class="status-pill ${st.cls}">${st.label}</span>
+        </div>
+        <div class="footer-note">
+          <div class="foot-note">${esc(settings.note || 'For internal use only')}</div>
+          <div class="sign-row"><div class="sign-item"><span class="sign-cap">Checked by</span><span class="sign-line"></span></div><div class="sign-item"><span class="sign-cap">Reviewed by</span><span class="sign-line"></span></div></div>
+          <div class="foot-meta">Label ${i + 1} of ${total} &middot; Printed ${esc(stamp)}</div>
+        </div>
+      </div>`;
+  });
+
+  if (!total) {
+    labelsWrapper.innerHTML = `
+      <div class="empty no-print">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>
+        </svg>
+        <h3>No labels yet</h3>
+        <p>Scan or paste barcode data above &mdash; labels will appear here automatically.</p>
+      </div>`;
+  } else {
+    labelsWrapper.innerHTML = html;
+  }
+
+  const incomplete = res.items.filter(x => x.incomplete).length;
+  const expired = res.items.filter(x => x.expired && !x.incomplete).length;
+  const near = res.items.filter(x => x.near && !x.incomplete).length;
+  const printable = total - incomplete;
+  lastStats = { printable, expired };
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statReady').textContent = printable;
+  document.getElementById('statIncomplete').textContent = incomplete;
+  document.getElementById('statExpired').textContent = expired;
+  document.getElementById('statNear').textContent = near;
+  document.getElementById('statNearSub').textContent = 'within ' + settings.nearDays + ' days';
+
+  const parts = [];
+  if (total) parts.push('<b>' + printable + '</b> ready to print');
+  if (incomplete) parts.push('<b class="red">' + incomplete + '</b> incomplete (excluded from print)');
+  if (expired) parts.push('<b class="red">' + expired + '</b> expired');
+  if (near) parts.push('<b class="amber">' + near + '</b> nearing expiry');
+  if (res.dups) parts.push(res.dups + ' duplicate scan(s) skipped');
+  if (res.junk) parts.push('<b class="amber">' + res.junk + '</b> unreadable scan(s) ignored &mdash; please rescan');
+
+  if (parts.length) {
+    banner.innerHTML = parts.join(' &nbsp;|&nbsp; ');
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  printBtn.disabled = printable === 0;
+  fitAllLabels();
+}
+
+function processData() {
+  render(analyse(scanInput.value.trim()));
+}
+
+/* ============================================================
+   Print size + auto-fit
+   ============================================================ */
+const MIN_LABEL_FIT = 0.5;
+
+function applySize(v) {
+  const fixed = v !== 'a4' && v !== 'a4multi';
+  let css;
+
+  if (fixed) {
+    const parts = v.split('x');
+    css = '@page { size: ' + parts[0] + 'mm ' + parts[1] + 'mm; margin: 0; }';
+    document.documentElement.style.setProperty('--label-w', parts[0] + 'mm');
+    document.documentElement.style.setProperty('--label-h', parts[1] + 'mm');
+    document.body.classList.add('fixed-size');
+  } else {
+    css = '@page { size: A4; margin: 10mm; }';
+    document.documentElement.style.removeProperty('--label-w');
+    document.documentElement.style.removeProperty('--label-h');
+    document.body.classList.remove('fixed-size');
+  }
+
+  document.getElementById('pageStyle').textContent = css;
+  document.body.classList.toggle('multi', v === 'a4multi');
+  document.body.classList.toggle('small', fixed);
+  fitAllLabels();
+  try { localStorage.setItem(LS.size, v); } catch (e) { /* ignore */ }
+}
+
+/* Auto-shrink: label ka poora text proportionally chhota hota hai jab tak
+   selected label size ke andar fit na ho jaye. Screen aur print dono par
+   same result milta hai. */
+function fitOneLabel(card) {
+  card.style.removeProperty('--fit');
+
+  let fit = 1;
+  let guard = 0;
+
+  while (guard++ < 20) {
+    const cs = getComputedStyle(card);
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const availH = card.clientHeight - padY;
+    const availW = card.clientWidth - padX;
+    if (availH <= 4 || availW <= 4) break;
+
+    /* scrollHeight/scrollWidth content ka poora size dete hain, overflow hone par bhi. */
+    const needH = (card.scrollHeight - padY) / availH;
+    const needW = (card.scrollWidth - padX) / availW;
+    const need = Math.max(needH, needW);
+
+    if (need <= 1.001) break;
+
+    const next = Math.max(MIN_LABEL_FIT, fit / need);
+    if (Math.abs(next - fit) < 0.004) { fit = next; break; }
+    fit = next;
+    card.style.setProperty('--fit', fit);
+  }
+
+  if (fit < 1) card.style.setProperty('--fit', fit);
+}
+
+function fitAllLabels(sync) {
+  const run = () => document.querySelectorAll('.label-card').forEach(fitOneLabel);
+  if (sync) run();
+  else requestAnimationFrame(run);
+}
+
+window.addEventListener('beforeprint', () => fitAllLabels(true));
+
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => fitAllLabels(true), 150);
+});
+
+/* ============================================================
+   UI helpers
+   ============================================================ */
+function toast(message, type) {
+  toastEl.textContent = message;
+  toastEl.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 3400);
+}
+
+function copyText(text, message) {
+  const done = () => { if (message) toast(message, 'success'); };
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      done();
+    } catch (e) {
+      toast('Could not copy. Please note the License ID manually.', 'error');
+    }
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  } else {
+    fallback();
+  }
+}
+
+function anyModalOpen() {
+  return !settingsModal.hidden || !licenseModal.hidden;
+}
+
+function openModal(el) {
+  el.hidden = false;
+  const focusable = el.querySelector('input, select, button');
+  if (focusable) setTimeout(() => { try { focusable.focus(); } catch (e) {} }, 50);
+}
+
+function closeModal(el) {
+  el.hidden = true;
+  if (!lic.lockVisible && !anyModalOpen()) {
+    try { scanInput.focus(); } catch (e) {}
+  }
+}
+
+function fillSettingsForm() {
+  document.getElementById('setCompany').value = settings.company || '';
+  document.getElementById('setNote').value = settings.note || '';
+  document.getElementById('setNearDays').value = settings.nearDays;
+  document.getElementById('setStatus').value = settings.status;
+  document.getElementById('setContact').value = settings.contact || '';
+}
+
+function applySettings(rerender) {
+  document.getElementById('footerCompany').textContent = settings.company || 'Quality Assurance';
+  lockContact.textContent = settings.contact || 'your software supplier';
+  statusSel.value = STATUSES[settings.status] ? settings.status : 'quarantine';
+  if (rerender) processData();
+}
+
+function updateCharCount() {
+  const n = scanInput.value.length;
+  document.getElementById('scanCount').textContent = n ? n + ' character' + (n === 1 ? '' : 's') : '0 characters';
+}
+
+/* ============================================================
+   Events
+   ============================================================ */
+scanInput.addEventListener('input', () => {
+  updateCharCount();
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(processData, DEBOUNCE_MS);
+});
+
+printBtn.addEventListener('click', () => {
+  if (lic.lockVisible) return;
+  if (lastStats.expired > 0 &&
+      !confirm(lastStats.expired + ' label(s) are for EXPIRED material and will carry an EXPIRED stamp. Print anyway?')) return;
+  window.print();
+});
+
+clearBtn.addEventListener('click', () => {
+  if (scanInput.value && !confirm('Clear all scanned data and generated labels?')) return;
+  scanInput.value = '';
+  updateCharCount();
+  processData();
+  scanInput.focus();
+});
+
+sizeSel.addEventListener('change', () => applySize(sizeSel.value));
+statusSel.addEventListener('change', () => processData());
+
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  scanInput.value = [
+    'Product Identification Code: RM-1024',
+    'Name of the API: Paracetamol IP/BP',
+    'Batch No.: PCM-26-081',
+    'Mfg. Dt.: 12/05/2026',
+    'Expiry Dt.: 11/2029',
+    'Drum No.: 07',
+    'Manufacturer: Sunrise Pharmaceuticals Ltd.',
+    'Storage Cond: Store below 25°C, protected from light',
+    'Licence No: 12345'
+  ].join('\n');
+  updateCharCount();
+  processData();
+  toast('Sample data loaded.');
+  scanInput.focus();
+});
+
+/* Settings modal */
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  fillSettingsForm();
+  openModal(settingsModal);
+});
+
+document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+  const near = parseInt(document.getElementById('setNearDays').value, 10);
+  if (!Number.isFinite(near) || near < 1 || near > 365) {
+    toast('Near-expiry days must be between 1 and 365.', 'error');
+    document.getElementById('setNearDays').focus();
+    return;
+  }
+  settings.company = document.getElementById('setCompany').value.trim().slice(0, 60);
+  settings.note = document.getElementById('setNote').value.trim().slice(0, 80);
+  settings.nearDays = near;
+  settings.status = document.getElementById('setStatus').value;
+  settings.contact = document.getElementById('setContact').value.trim().slice(0, 80);
+  persistSettings();
+  applySettings(true);
+  closeModal(settingsModal);
+  toast('Settings saved.', 'success');
+});
+
+/* Licence modal */
+document.getElementById('licenseBtn').addEventListener('click', () => {
+  if (lic.lockVisible) return;
+  document.getElementById('licError').textContent = '';
+  document.getElementById('licCode').value = '';
+  fillLicenseModal(licenseStatus());
+  openModal(licenseModal);
+});
+
+document.getElementById('simulateBtn').addEventListener('click', () => {
+  if (!confirm('This will end the current access period on this computer and show the lock screen, so you can test the activation flow. Continue?')) return;
+  if (!lic.state) return;
+  lic.state.expires = Date.now() - 1000;
+  lic.state.lastSeen = Date.now();
+  lic.state.trial = false;
+  saveLicense();
+  closeModal(licenseModal);
+  refreshLicenseUI();
+  toast('Test mode: access period ended.');
+});
+
+document.getElementById('licIdCopy').addEventListener('click', () => copyText(licenseId(), 'License ID copied.'));
+document.getElementById('lockCopyId').addEventListener('click', () => copyText(licenseId(), 'License ID copied.'));
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(document.getElementById(btn.getAttribute('data-close'))));
+});
+
+[settingsModal, licenseModal].forEach(modal => {
+  modal.addEventListener('click', e => {
+    if (e.target === modal) closeModal(modal);
+  });
+});
+
+/* Code input formatting */
+[unlockCode, document.getElementById('licCode')].forEach(inp => {
+  inp.addEventListener('input', () => {
+    inp.value = formatCodeInput(inp.value);
+  });
+});
+
+/* Unlock from lock screen */
+unlockForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const res = tryUnlock(unlockCode.value);
+  if (res.ok) {
+    lockError.textContent = '';
+    refreshLicenseUI();
+    toast('Access restored \u00b7 valid until ' + fmtDate(res.expires), 'success');
+    setTimeout(() => { try { scanInput.focus(); } catch (err) {} }, 100);
+  } else {
+    lockError.textContent = res.error;
+    unlockCode.select();
+  }
+});
+
+/* Unlock from licence modal */
+document.getElementById('licActivateBtn').addEventListener('click', () => {
+  const input = document.getElementById('licCode');
+  const err = document.getElementById('licError');
+  const res = tryUnlock(input.value);
+  if (res.ok) {
+    err.textContent = '';
+    input.value = '';
+    closeModal(licenseModal);
+    refreshLicenseUI();
+    toast('Licence renewed \u00b7 valid until ' + fmtDate(res.expires), 'success');
+  } else {
+    err.textContent = res.error;
+    input.select();
+  }
+});
+
+document.getElementById('licCode').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('licActivateBtn').click();
+});
+
+/* Global shortcuts and focus behaviour */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (!settingsModal.hidden) closeModal(settingsModal);
+    else if (!licenseModal.hidden) closeModal(licenseModal);
+  }
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'l' && !lic.lockVisible) {
+    e.preventDefault();
+    document.getElementById('licenseBtn').click();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p' && lic.lockVisible) {
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('click', e => {
+  if (lic.lockVisible || anyModalOpen()) return;
+  if (!e.target.closest('button, select, input, textarea, a, .label-card')) {
+    try { scanInput.focus(); } catch (err) {}
+  }
+});
+
+window.addEventListener('focus', () => {
+  if (lic.lockVisible || anyModalOpen()) return;
+  try { scanInput.focus(); } catch (e) {}
+});
+
+/* Clock / licence ticker */
+function startTicker() {
+  setInterval(() => {
+    const now = Date.now();
+    if (lic.state && !lic.lockVisible && !lic.invalid && now > lic.state.expires) {
+      refreshLicenseUI();
+      return;
+    }
+    if (lic.state && !lic.lockVisible && !lic.invalid && now - lic.lastSaved > 60000) {
+      lic.state.lastSeen = now;
+      saveLicense();
+      lic.lastSaved = now;
+    }
+    refreshLicenseUI();
+  }, 30000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshLicenseUI();
+  });
+}
+
+/* ============================================================
+   Init
+   ============================================================ */
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+(async function init() {
+  await loadLicense();
+
+  applySettings(false);
+  updateCharCount();
+  processData();
+
+  let v = '100x150';
+  try { v = localStorage.getItem(LS.size) || '100x150'; } catch (e) { /* ignore */ }
+  if (![...sizeSel.options].some(o => o.value === v)) v = '100x150';
+  sizeSel.value = v;
+  applySize(v);
+
+  refreshLicenseUI();
+  startTicker();
+
+  if (!lic.lockVisible) {
+    try { scanInput.focus(); } catch (e) {}
+  }
+})();
+
+/* ============================================================
+   PWA / offline support
+   ============================================================ */
+let installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installPrompt = e;
+  installBtn.hidden = false;
+});
+
+installBtn.addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  try { await installPrompt.userChoice; } catch (e) { /* ignore */ }
+  installPrompt = null;
+  installBtn.hidden = true;
+});
+
+window.addEventListener('appinstalled', () => {
+  installPrompt = null;
+  installBtn.hidden = true;
+  toast('App installed on this device.', 'success');
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {
+      /* file:// se chalane par service worker register nahi hota — app phir bhi kaam karti hai. */
+    });
+  });
+}
+</script>
+</body>
+</html>
