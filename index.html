@@ -570,7 +570,7 @@
   </main>
 
   <footer class="app-footer no-print">
-    <span>Raw Material Label System v2.4.0</span>
+    <span>Raw Material Label System v2.4.1</span>
     <span class="sep">&middot;</span>
     <span id="footerCompany">Quality Assurance</span>
     <span class="sep">&middot;</span>
@@ -601,7 +601,7 @@
     </form>
     <p class="lock-error" id="lockError" role="alert"></p>
     <p class="lock-help">Need this month's code?<br>Contact <b id="lockContact">your software supplier</b></p>
-    <p class="lock-meta" id="lockMeta">Version 2.4.0</p>
+    <p class="lock-meta" id="lockMeta">Version 2.4.1</p>
   </div>
 </div>
 
@@ -696,12 +696,12 @@
 'use strict';
 
 /* ============================================================
-   Raw Material Label System v2.4.0
+   Raw Material Label System v2.4.1
    Monthly activation-code protection (30-day period)
    Owner key generator: license_key_generator.html
    ============================================================ */
 
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.4.1';
 const PERIOD_DAYS = 30;
 const WARN_DAYS = 5;
 /* Free evaluation period on a brand-new install. Set to 0 to require a code
@@ -1229,44 +1229,150 @@ function fillLicenseModal(st) {
 }
 
 /* ============================================================
-   Parsing engine (Upgraded for Case, Labels & Space Provision)
+   Parsing engine (unchanged behaviour)
    ============================================================ */
 const LABELS = {
-  // बिना स्पेस वाले 'Productcode' और अन्य वेरिएशन्स शामिल किए गए हैं
-  code:  'Product Identification Code|Product code|Material Code|Item Code|Productcode',
-  name:  'Name of the API|API Name|Material Name|(?<!Supplier\\s)(?<!Vendor\\s)(?<!Manufacturer\\s)(?<!Brand\\s)(?<!Trade\\s)(?<!Product\\s)(?<!Company\\s)(?<!Unit\\s)Name',
-  ar:    'A\\.?R\\.?\\s*No\\.?|Analysis Report No\\.?|Analysis No\\.?',
-  batch: 'Batch\\s*No\\.?|Lot\\s*No\\.?|Batch',
-  
-  // Manufacturing के सभी संभावित वेरिएशन्स (Date of Manufacturing, Manufacturing Date, Mfg Date) बिना स्पेस के भी शामिल हैं
-  mfg:   'Mfg\\.?\\s*Dt\\.?|Mfg\\.?\\s*Date|DOM|Manufacturing\\s*Date|Date\\s*of\\s*Manufacturing|Mfgdate|Manufacturingdate',
-
-  // Expiry के सभी संभावित वेरिएशन्स (Expiry Date, Exp Date) बिना स्पेस के भी शामिल हैं
-  exp:   'Expiry\\s*Dt\\.?|Expiry\\s*Date|Exp\\.?\\s*Dt\\.?|DOE|Expirydate|Expdate',
-  retest:'Retest\\s*(?:Dt\\.?|Date)|Re-?test\\s*(?:Dt\\.?|Date)|Retestdate',
-  drum:  'Drum\\s*No\\.?|Container\\s*No\\.?',
-  qty:   'Net\\s*(?:Qty|Wt|Weight)|Quantity|Qty',
-  mfr:   'Manufacturer(?:\\s*Name)?',
+  code:  'Product\\s*Identification\\s*Code|Product\\s*Code|Material\\s*Code|Item\\s*Code|\\bMat\\b',
+  name:  'Name\\s+of\\s+the\\s+API|Name\\s+of\\s+(?:the\\s+)?Product|NAME\\s+OF\\s+PRODUCT|API\\s+Name|Material\\s+Name|Product\\s+Name|Description|\\bDesc\\b|(?<!Supplier\\s)(?<!Vendor\\s)(?<!Manufacturer\\s)(?<!Brand\\s)(?<!Trade\\s)(?<!Product\\s)(?<!Company\\s)(?<!Unit\\s)Name',
+  ar:    'A\\.?R\\.?\\s*No\\.?|Analysis\\s*Report\\s*No\\.?|Analysis\\s*No\\.?',
+  batch: 'Batch\\s*No\\.?|(?<![A-Za-z])Lot\\s*No\\.?|\\bBatch\\b|(?<![A-Za-z])Lot\\b',
+  mfg:   'Mfg\\.?\\s*Dt\\.?|Mfg\\.?\\s*Date|MFG\\s*\\.?\\s*DATE|Manufacturing\\s*Date|Date\\s*of\\s*Manufacturing|\\bDOM\\b|\\bMfg\\b(?!\\s*\\.?\\s*(?:Lic|BY))',
+  exp:   'Expiry\\s*Dt\\.?|Expiry\\s*Date|Exp\\.?\\s*Dt\\.?|Exp\\.?\\s*Date|EXP\\s*\\.?\\s*DATE|ExpiryDt\\.?|\\bExp\\b(?!\\s*\\.?\\s*Lic)|\\bDOE\\b',
+  retest:'Retest\\s*(?:Dt\\.?|Date)|Re-?test\\s*(?:Dt\\.?|Date)',
+  drum:  'Drum\\s*No\\.?|Container\\s*No\\.?|\\bDrum\\b',
+  qty:   'Net\\s*(?:Qty|Wt|Weight)\\.?|Quantity|\\bQty\\b',
+  mfr:   'Manufacturer(?:\\s*Name)?|MFG\\s*\\.?\\s*BY|Mfd\\.?\\s*By|\\bManf\\b',
   sup:   'Supplier(?:\\s*Name)?|Vendor(?:\\s*Name)?',
-  stor:  'Storage(?:\\s*Cond(?:itions?)?\\.?)?'
+  stor:  'Storage(?:\\s*Cond(?:itions?)?\\.?)?|\\bCondition\\b'
 };
-const STOP_LABELS = 'Licen[cs]e|TEL|Phone|Address|E-?mail|Website';
-const ALL_LABELS = Object.values(LABELS).concat(STOP_LABELS).join('|');
+const FIELD_ORDER = ['code', 'name', 'ar', 'batch', 'mfg', 'exp', 'retest', 'drum', 'qty', 'mfr', 'sup', 'stor'];
+
+/* Anything that ends the current value but is not a field we keep. */
+const STOPS = [
+  'Grade', 'Gross\\s*(?:Wt|Weight)', 'Tare\\s*(?:Wt|Weight)', 'Bsize', 'Batch\\s*Size',
+  'SSCC', 'Mfg\\.?\\s*Lic(?:ence)?\\.?\\s*No\\.?', '(?<![A-Za-z])Lic(?:en[cs]e)?(?:\\s*No\\.?)?',
+  'Address', '\\bAdd\\b', 'Plot', 'TEL', 'Phone', 'E-?mail', 'Website', 'Barcode', 'GTIN',
+  'Serial', 'Shelf\\s*Life', 'Marked\\s*By', 'Checked\\s*By', 'QTY', 'Total',
+  'Art\\.?\\s*No', 'Ref\\.?\\s*No', 'Packing', 'Storage\\s*Temp'
+];
+
+const PARSER = (() => {
+  const parts = FIELD_ORDER.map(k => '(?<' + k + '>' + LABELS[k] + ')');
+  STOPS.forEach((p, i) => parts.push('(?<stop' + i + '>' + p + ')'));
+  return new RegExp('(?:' + parts.join('|') + ')\\s*\\.?\\s*:', 'gi');
+})();
+
+/* Broad record starts so concatenated scans split correctly. */
+const RECORD_START = new RegExp(
+  '(?=(?:https?:\\/\\/|(?:Product\\s*Identification\\s*Code|Product\\s*Code|Material\\s*Code|Item\\s*Code|NAME\\s+OF\\s+PRODUCT|Name\\s+of\\s+the\\s+API|Name\\s+of\\s+(?:the\\s+)?Product|Material\\s+Name|Product\\s+Name)\\s*:?|(?<![A-Za-z])Mat\\s*:))',
+  'gi'
+);
+const NAME_START = /^(?:NAME\s+OF\s+PRODUCT|Name\s+of\s+(?:the\s+)?(?:API|Product)|Material\s+Name|Product\s+Name)\b/i;
+
+/* A fragment that carries only a material-code field (one-field-per-line scans). */
+function isBareCode(text) {
+  const rest = text.replace(/^(?:Product\s*Identification\s*Code|Product\s*Code|Material\s*Code|Item\s*Code)\s*:\s*/i, '');
+  if (rest === text) return false;
+  return rest.length < 60 && !/[\n:]/.test(rest);
+}
+
+function parseFields(block) {
+  const d = {};
+  const matches = [...block.matchAll(PARSER)];
+  matches.forEach((m, i) => {
+    const key = Object.keys(m.groups).find(k => m.groups[k] !== undefined);
+    if (!key || key.startsWith('stop') || d[key]) return;
+    const start = m.index + m[0].length;
+    const end = i + 1 < matches.length ? matches[i + 1].index : block.length;
+    let v = block.slice(start, end)
+      .replace(/\s+/g, ' ')
+      .replace(/^[\s,;|/]+|[\s,;|/]+$/g, '');
+    /* "AMIT HYDROCOLLOIDSPLOT NO ..." style glue: keep only the company name. */
+    if ((key === 'mfr' || key === 'sup') && v) {
+      v = v.split(/(?<=[A-Za-z])(?=PLOT\s*NO|ADDRESS\b)/i)[0].trim();
+    }
+    d[key] = v;
+  });
+  return d;
+}
+
+function gs1Date(v) {
+  if (/^\d{6}$/.test(v)) return '20' + v.slice(0, 2) + '-' + v.slice(2, 4) + '-' + v.slice(4, 6);
+  return v;
+}
+
+function applyGS1(d, ai, val) {
+  const v = String(val).trim();
+  if (!v) return;
+  if (ai === '00') { if (!d.drum) d.drum = 'SSCC ' + v.replace(/^\(?00\)?/, ''); }
+  else if (ai === '01') { if (!d.code) d.code = v; }
+  else if (ai === '10') { if (!d.batch) d.batch = v; }
+  else if (ai === '11') { if (!d.mfg) d.mfg = gs1Date(v); }
+  else if (ai === '17') { if (!d.exp) d.exp = gs1Date(v); }
+}
+
+function parseUrlRecord(block) {
+  const compact = block.replace(/\s+/g, '');
+  const d = {};
+  if (!/^https?:\/\//i.test(compact)) return d;
+  let url;
+  try { url = new URL(compact); } catch (e) { return d; }
+
+  const set = (k, v) => { if (!d[k] && v) d[k] = v; };
+
+  const segs = url.pathname.split('/').filter(Boolean);
+  for (let i = 0; i < segs.length - 1; i++) {
+    const ai = segs[i].toUpperCase();
+    if (/^\d{2}$/.test(ai)) {
+      applyGS1(d, ai, decodeURIComponent(segs[i + 1]));
+      i++;
+    }
+  }
+
+  url.searchParams.forEach((val, key) => {
+    const k = key.toLowerCase();
+    if (/^\d{2}$/.test(k)) applyGS1(d, k, val);
+    else if (['d', 'pid', 'product', 'productcode', 'mat', 'material', 'item', 'code'].includes(k)) set('code', val);
+    else if (['b', 'batch', 'lot'].includes(k)) set('batch', val);
+    else if (['mfg', 'mfgdate', 'mfgdt', 'manufactured'].includes(k)) set('mfg', val);
+    else if (['exp', 'expiry', 'expdate', 'expdt'].includes(k)) set('exp', val);
+    else if (['ss', 'sscc'].includes(k)) set('drum', 'SSCC ' + val.replace(/^\(?00\)?/, ''));
+  });
+  return d;
+}
+
+function splitRecords(raw) {
+  const re = new RegExp(RECORD_START.source, 'gi');
+  const starts = [];
+  let m;
+  while ((m = re.exec(raw))) {
+    starts.push(m.index);
+    if (m.index === re.lastIndex) re.lastIndex++;
+  }
+  if (!starts.length) return [raw.trim()].filter(Boolean);
+  if (starts[0] > 0) starts.unshift(0);
+
+  const segs = starts
+    .map((s, i) => raw.slice(s, i + 1 < starts.length ? starts[i + 1] : raw.length).trim())
+    .filter(Boolean);
+
+  /* One-field-per-line scans: "Material Code: X" followed by "Material Name: Y"
+     is a single record; merge the name fragment back. */
+  const out = [];
+  segs.forEach(seg => {
+    const prev = out[out.length - 1];
+    if (prev && NAME_START.test(seg) && !/^https?:\/\//i.test(prev) && isBareCode(prev)) {
+      out[out.length - 1] = prev + ' ' + seg;
+    } else {
+      out.push(seg);
+    }
+  });
+  return out.filter(s => s.length >= 4);
+}
+
 const CRITICAL = ['code', 'name', 'batch', 'exp'];
 const CRITICAL_NAMES = { code: 'material code', name: 'material name', batch: 'batch no', exp: 'expiry date' };
 const DEBOUNCE_MS = 500;
-
-function field(block, key) {
-  const stopNewline = key === 'stor' ? '' : '|\\r?\\n';
-  const re = new RegExp(
-    '\\b(?:' + LABELS[key] + ')\\s*:\\s*([\\s\\S]*?)(?=\\s*[,;|]?\\s*\\b(?:' + ALL_LABELS + ')\\s*:' + stopNewline + '|$)',
-    'i'
-  );
-  const m = block.match(re);
-  let v = m ? m[1].replace(/\s+/g, ' ') : '';
-  if (key === 'stor') v = v.replace(/\s*(?:\bLicen[cs]e\b|\bTEL\b|\bAndhra\b|\b\d{6}\b).*$/i, '');
-  return v.replace(/^[\s,;|]+|[\s,;|]+$/g, '');
-}
 
 const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 
@@ -1306,33 +1412,18 @@ function analyse(raw) {
   const out = { items: [], dups: 0, junk: 0 };
   if (!raw) return out;
 
-  // SPACE PROVISION LOGIC: यहाँ बिना स्पेस वाले कॉमन टेक्स्ट को स्पेस में बदला जा रहा है 
-  // ताकि कोलन (:) से पहले सही कीवर्ड डिटेक्ट हो सके (उदा. MANUFACTURINGDATE: -> MANUFACTURING DATE:)
-  let cleanRaw = raw
-    .replace(/MANUFACTURINGDATE\s*:/gi, "Manufacturing Date:")
-    .replace(/DATEOFMANUFACTURING\s*:/gi, "Date of Manufacturing:")
-    .replace(/EXPIRYDATE\s*:/gi, "Expiry Date:")
-    .replace(/EXPDATE\s*:/gi, "Exp Date:")
-    .replace(/MFGDATE\s*:/gi, "Mfg Date:")
-    .replace(/RETESTDATE\s*:/gi, "Retest Date:")
-    .replace(/PRODUCTCODE\s*:/gi, "Product code:");
-
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  
-  // यहाँ भी स्प्लिटिंग को नए स्पेस वाले पैटर्न्स के हिसाब से सेफ रखा गया है
-  const blocks = cleanRaw.split(/(?=\b(?:Product Identification Code|Product code)\s*:)/i);
   const seen = new Set();
   const nearDays = settings.nearDays;
 
-  blocks.forEach(b => {
-    b = b.trim();
-    if (b.length < 5) return;
+  splitRecords(raw).forEach(b => {
+    if (b.length < 4) return;
 
-    const d = {};
-    for (const k in LABELS) d[k] = field(b, k);
+    const isUrl = /^https?:\/\//i.test(b);
+    const d = isUrl ? parseUrlRecord(b) : parseFields(b);
     if (!Object.values(d).some(Boolean)) { out.junk++; return; }
 
-    const key = b.toLowerCase().replace(/\s+/g, ' ');
+    const key = isUrl ? b.replace(/\s+/g, '').toLowerCase() : b.toLowerCase().replace(/\s+/g, ' ');
     if (seen.has(key)) { out.dups++; return; }
     seen.add(key);
 
