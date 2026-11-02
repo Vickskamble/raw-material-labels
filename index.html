@@ -1233,7 +1233,7 @@ function fillLicenseModal(st) {
    ============================================================ */
 const LABELS = {
   code:  'Product\\s*Identification\\s*Code|Product\\s*Code|Material\\s*Code|Item\\s*Code|\\bMat\\b',
-  name:  'Name\\s+of\\s+the\\s+API|Name\\s+of\\s+(?:the\\s+)?Product|NAME\\s+OF\\s+PRODUCT|API\\s+Name|Material\\s+Name|Product\\s+Name|Description|\\bDesc\\b|(?<!Supplier\\s)(?<!Vendor\\s)(?<!Manufacturer\\s)(?<!Brand\\s)(?<!Trade\\s)(?<!Product\\s)(?<!Company\\s)(?<!Unit\\s)Name',
+  name:  'Name\\s*of\\s*the\\s*API|Name\\s*of\\s*(?:the\\s*)?Product|NAME\\s*OF\\s*PRODUCT|API\\s*Name|Material\\s*Name|Product\\s*Name|Description|\\bDesc\\b|(?<!Supplier\\s)(?<!Vendor\\s)(?<!Manufacturer\\s)(?<!Brand\\s)(?<!Trade\\s)(?<!Product\\s)(?<!Company\\s)(?<!Unit\\s)Name',
   ar:    'A\\.?R\\.?\\s*No\\.?|Analysis\\s*Report\\s*No\\.?|Analysis\\s*No\\.?',
   batch: 'Batch\\s*No\\.?|(?<![A-Za-z])Lot\\s*No\\.?|\\bBatch\\b|(?<![A-Za-z])Lot\\b',
   mfg:   'Mfg\\.?\\s*Dt\\.?|Mfg\\.?\\s*Date|MFG\\s*\\.?\\s*DATE|Manufacturing\\s*Date|Date\\s*of\\s*Manufacturing|\\bDOM\\b|\\bMfg\\b(?!\\s*\\.?\\s*(?:Lic|BY))',
@@ -1264,10 +1264,10 @@ const PARSER = (() => {
 
 /* Broad record starts so concatenated scans split correctly. */
 const RECORD_START = new RegExp(
-  '(?=(?:https?:\\/\\/|(?:Product\\s*Identification\\s*Code|Product\\s*Code|Material\\s*Code|Item\\s*Code|NAME\\s+OF\\s+PRODUCT|Name\\s+of\\s+the\\s+API|Name\\s+of\\s+(?:the\\s+)?Product|Material\\s+Name|Product\\s+Name)\\s*:?|(?<![A-Za-z])Mat\\s*:))',
+  '(?=(?:https?:\\/\\/|(?:Product\\s*Identification\\s*Code|Product\\s*Code|Material\\s*Code|Item\\s*Code|NAME\\s*OF\\s*PRODUCT|Name\\s*of\\s*the\\s*API|Name\\s*of\\s*(?:the\\s*)?Product|Material\\s*Name|Product\\s*Name)\\s*:?|(?<![A-Za-z])Mat\\s*:))',
   'gi'
 );
-const NAME_START = /^(?:NAME\s+OF\s+PRODUCT|Name\s+of\s+(?:the\s+)?(?:API|Product)|Material\s+Name|Product\s+Name)\b/i;
+const NAME_START = /^(?:NAME\s*OF\s*PRODUCT|Name\s*of\s*(?:the\s*)?(?:API|Product)|Material\s*Name|Product\s*Name)\b/i;
 
 /* A fragment that carries only a material-code field (one-field-per-line scans). */
 function isBareCode(text) {
