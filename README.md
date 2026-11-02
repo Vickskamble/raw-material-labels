@@ -18,6 +18,8 @@ labels without an internet connection.
   supplier and storage conditions.
 - **Expiry & retest checks** — expired material gets an `EXPIRED` / `RETEST DUE`
   stamp, and near-expiry items are highlighted.
+- **Fill missing data** — if a scan lacks code, name, batch or expiry, type it
+  directly under that label and it becomes printable.
 - **Standard label size** — 100 × 150 mm (4 × 6 in) by default, with true-to-size
   on-screen preview. A4, 100 × 100 mm and 100 × 75 mm also supported.
 - **Auto-shrink text** — long names, addresses or storage conditions scale down

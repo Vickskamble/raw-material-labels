@@ -265,6 +265,21 @@
     transform:rotate(-3deg);border-radius:.222em;
   }
   .issue-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+  .label-unit{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .fill-box{
+    padding:12px 14px;border:1.5px dashed #f59e0b;border-radius:10px;
+    background:#fffbeb;font-size:12.5px;color:#78350f;
+  }
+  .fill-title{font-weight:800;font-size:11px;letter-spacing:.6px;text-transform:uppercase;margin-bottom:9px;color:#b45309}
+  .fill-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+  .fill-fields label{display:flex;flex-direction:column;gap:4px;font-size:10.5px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.4px}
+  .fill-fields input{
+    font:inherit;font-size:13px;padding:7px 9px;border:1px solid #d6d3d1;border-radius:7px;
+    background:#fff;color:#0f172a;text-transform:none;letter-spacing:0;
+  }
+  .fill-fields input:focus{outline:2px solid #f59e0b;outline-offset:1px}
+  .fill-actions{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .fill-hint{font-size:11px;color:#a16207}
   .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.2px}
   .badge.red{background:var(--red-700);color:#fff}
   .badge.amber{background:#fbbf24;color:#000}
@@ -467,8 +482,8 @@
       width:var(--label-w);height:var(--label-h);
       box-sizing:border-box;overflow:hidden;
     }
-    .label-card + .label-card{break-before:page;page-break-before:always}
-    body.multi .label-card + .label-card{break-before:auto;page-break-before:auto;margin-top:8mm}
+    .label-unit + .label-unit .label-card{break-before:page;page-break-before:always}
+    body.multi .label-unit + .label-unit .label-card{break-before:auto;page-break-before:auto;margin-top:8mm}
     .label-val.missing{color:#000}
     .status-pill{color:#000 !important;background:#fff !important;border-color:#000 !important}
     .sign-line{border-bottom-color:#000}
@@ -570,7 +585,7 @@
   </main>
 
   <footer class="app-footer no-print">
-    <span>Raw Material Label System v2.4.1</span>
+    <span>Raw Material Label System v2.5.0</span>
     <span class="sep">&middot;</span>
     <span id="footerCompany">Quality Assurance</span>
     <span class="sep">&middot;</span>
@@ -601,7 +616,7 @@
     </form>
     <p class="lock-error" id="lockError" role="alert"></p>
     <p class="lock-help">Need this month's code?<br>Contact <b id="lockContact">your software supplier</b></p>
-    <p class="lock-meta" id="lockMeta">Version 2.4.1</p>
+    <p class="lock-meta" id="lockMeta">Version 2.5.0</p>
   </div>
 </div>
 
@@ -696,12 +711,12 @@
 'use strict';
 
 /* ============================================================
-   Raw Material Label System v2.4.1
+   Raw Material Label System v2.5.0
    Monthly activation-code protection (30-day period)
    Owner key generator: license_key_generator.html
    ============================================================ */
 
-const APP_VERSION = '2.4.1';
+const APP_VERSION = '2.5.0';
 const PERIOD_DAYS = 30;
 const WARN_DAYS = 5;
 /* Free evaluation period on a brand-new install. Set to 0 to require a code
@@ -1121,6 +1136,7 @@ const installBtn = document.getElementById('installBtn');
 let debounceTimer = null;
 let toastTimer = null;
 let lastStats = { printable: 0, expired: 0 };
+let lastResults = null;
 
 /* ============================================================
    Licence UI
@@ -1408,11 +1424,26 @@ function parseDate(s, endOfMonth) {
   return null;
 }
 
+function computeState(d, nearDays) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const expDateP = parseDate(d.exp, true);
+  const retDateP = parseDate(d.retest, true);
+  const dueDate = expDateP || retDateP;
+  const isRetest = !expDateP && !!retDateP;
+  const expired = !!dueDate && dueDate < today;
+  const near = !!dueDate && !expired && ((dueDate - today) / 864e5) <= nearDays;
+  const badDate = !!(d.exp && !expDateP) || !!(d.retest && !retDateP);
+
+  let missing = CRITICAL.filter(k => !d[k]);
+  if (d.retest) missing = missing.filter(k => k !== 'exp');
+
+  return { missing, expired, near, badDate, isRetest, incomplete: missing.length > 0 };
+}
+
 function analyse(raw) {
   const out = { items: [], dups: 0, junk: 0 };
   if (!raw) return out;
 
-  const today = new Date(); today.setHours(0, 0, 0, 0);
   const seen = new Set();
   const nearDays = settings.nearDays;
 
@@ -1427,18 +1458,7 @@ function analyse(raw) {
     if (seen.has(key)) { out.dups++; return; }
     seen.add(key);
 
-    const expDateP = parseDate(d.exp, true);
-    const retDateP = parseDate(d.retest, true);
-    const dueDate = expDateP || retDateP;
-    const isRetest = !expDateP && !!retDateP;
-    const expired = !!dueDate && dueDate < today;
-    const near = !!dueDate && !expired && ((dueDate - today) / 864e5) <= nearDays;
-    const badDate = !!(d.exp && !expDateP) || !!(d.retest && !retDateP);
-
-    let missing = CRITICAL.filter(k => !d[k]);
-    if (d.retest) missing = missing.filter(k => k !== 'exp');
-
-    out.items.push({ d, missing, expired, near, badDate, isRetest, incomplete: missing.length > 0 });
+    out.items.push(Object.assign({ d, key }, computeState(d, nearDays)));
   });
   return out;
 }
@@ -1447,6 +1467,7 @@ function analyse(raw) {
    Rendering
    ============================================================ */
 function render(res) {
+  lastResults = res;
   const stamp = new Date().toLocaleString('en-IN', {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
@@ -1491,7 +1512,22 @@ function render(res) {
       ' within ' + settings.nearDays + ' days</span>';
     if (it.badDate) badges += '<span class="badge grey">Date format not recognised &mdash; verify manually</span>';
 
+    const fillBox = it.incomplete ? `
+      <div class="fill-box screen-only" data-fill="${i}">
+        <div class="fill-title">&#9888; Missing data &mdash; type it here to print</div>
+        <div class="fill-fields">
+          ${it.missing.map(k => `<label>${esc(CRITICAL_NAMES[k] || k)}
+            <input data-field="${k}" placeholder="${k === 'code' ? 'e.g. 313873' : k === 'name' ? 'e.g. CEFADROXIL BP/EP' : k === 'batch' ? 'e.g. N3130390' : 'e.g. Jun 2029 or 06/2029'}">
+          </label>`).join('')}
+        </div>
+        <div class="fill-actions">
+          <button type="button" class="btn btn-sm fill-save" data-fill="${i}">Save &amp; enable print</button>
+          <span class="fill-hint">Values sirf is session ke liye hain.</span>
+        </div>
+      </div>` : '';
+
     html += `
+      <div class="label-unit">
       <div class="label-card${it.incomplete ? ' incomplete no-print' : ''}">
         ${badges ? '<div class="screen-only issue-badges">' + badges + '</div>' : ''}
         ${it.expired ? '<div class="stamp-wrap"><span class="stamp">' + (it.isRetest ? 'RETEST DUE' : 'EXPIRED') + '</span></div>' : ''}
@@ -1510,6 +1546,8 @@ function render(res) {
           <div class="sign-row"><div class="sign-item"><span class="sign-cap">Checked by</span><span class="sign-line"></span></div><div class="sign-item"><span class="sign-cap">Reviewed by</span><span class="sign-line"></span></div></div>
           <div class="foot-meta">Label ${i + 1} of ${total} &middot; Printed ${esc(stamp)}</div>
         </div>
+      </div>
+      ${fillBox}
       </div>`;
   });
 
@@ -1716,6 +1754,30 @@ scanInput.addEventListener('input', () => {
   updateCharCount();
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(processData, DEBOUNCE_MS);
+});
+
+/* Incomplete label: fill missing critical fields, then it becomes printable. */
+labelsWrapper.addEventListener('click', e => {
+  const btn = e.target.closest('.fill-save');
+  if (!btn || !lastResults) return;
+  const idx = Number(btn.dataset.fill);
+  const box = btn.closest('.fill-box');
+  const it = lastResults.items[idx];
+  if (!box || !it) return;
+
+  box.querySelectorAll('input[data-field]').forEach(inp => {
+    const v = inp.value.trim();
+    if (v) it.d[inp.dataset.field] = v;
+  });
+  Object.assign(it, computeState(it.d, settings.nearDays));
+  render(lastResults);
+});
+labelsWrapper.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || !e.target.matches('.fill-fields input')) return;
+  e.preventDefault();
+  const box = e.target.closest('.fill-box');
+  const btn = box && box.querySelector('.fill-save');
+  if (btn) btn.click();
 });
 
 printBtn.addEventListener('click', () => {
