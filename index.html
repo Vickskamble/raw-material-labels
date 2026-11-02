@@ -1760,16 +1760,17 @@ scanInput.addEventListener('input', () => {
 labelsWrapper.addEventListener('click', e => {
   const btn = e.target.closest('.fill-save');
   if (!btn || !lastResults) return;
-  const idx = Number(btn.dataset.fill);
-  const box = btn.closest('.fill-box');
-  const it = lastResults.items[idx];
-  if (!box || !it) return;
 
-  box.querySelectorAll('input[data-field]').forEach(inp => {
-    const v = inp.value.trim();
-    if (v) it.d[inp.dataset.field] = v;
+  /* Commit every filled input on screen, so values typed in other cards are not lost. */
+  document.querySelectorAll('.fill-box').forEach(box => {
+    const it = lastResults.items[Number(box.dataset.fill)];
+    if (!it) return;
+    box.querySelectorAll('input[data-field]').forEach(inp => {
+      const v = inp.value.trim();
+      if (v) it.d[inp.dataset.field] = v;
+    });
+    Object.assign(it, computeState(it.d, settings.nearDays));
   });
-  Object.assign(it, computeState(it.d, settings.nearDays));
   render(lastResults);
 });
 labelsWrapper.addEventListener('keydown', e => {
