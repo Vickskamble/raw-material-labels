@@ -1229,16 +1229,21 @@ function fillLicenseModal(st) {
 }
 
 /* ============================================================
-   Parsing engine (unchanged behaviour)
+   Parsing engine (Upgraded for Case, Labels & Space Provision)
    ============================================================ */
 const LABELS = {
-  code:  'Product Identification Code|Product code|Material Code|Item Code',
+  // बिना स्पेस वाले 'Productcode' और अन्य वेरिएशन्स शामिल किए गए हैं
+  code:  'Product Identification Code|Product code|Material Code|Item Code|Productcode',
   name:  'Name of the API|API Name|Material Name|(?<!Supplier\\s)(?<!Vendor\\s)(?<!Manufacturer\\s)(?<!Brand\\s)(?<!Trade\\s)(?<!Product\\s)(?<!Company\\s)(?<!Unit\\s)Name',
   ar:    'A\\.?R\\.?\\s*No\\.?|Analysis Report No\\.?|Analysis No\\.?',
   batch: 'Batch\\s*No\\.?|Lot\\s*No\\.?|Batch',
-  mfg:   'Mfg\\.?\\s*Dt\\.?|Mfg\\.?\\s*Date|DOM',
-  exp:   'Expiry\\s*Dt\\.?|Expiry\\s*Date|Exp\\.?\\s*Dt\\.?|DOE',
-  retest:'Retest\\s*(?:Dt\\.?|Date)|Re-?test\\s*(?:Dt\\.?|Date)',
+  
+  // Manufacturing के सभी संभावित वेरिएशन्स (Date of Manufacturing, Manufacturing Date, Mfg Date) बिना स्पेस के भी शामिल हैं
+  mfg:   'Mfg\\.?\\s*Dt\\.?|Mfg\\.?\\s*Date|DOM|Manufacturing\\s*Date|Date\\s*of\\s*Manufacturing|Mfgdate|Manufacturingdate',
+
+  // Expiry के सभी संभावित वेरिएशन्स (Expiry Date, Exp Date) बिना स्पेस के भी शामिल हैं
+  exp:   'Expiry\\s*Dt\\.?|Expiry\\s*Date|Exp\\.?\\s*Dt\\.?|DOE|Expirydate|Expdate',
+  retest:'Retest\\s*(?:Dt\\.?|Date)|Re-?test\\s*(?:Dt\\.?|Date)|Retestdate',
   drum:  'Drum\\s*No\\.?|Container\\s*No\\.?',
   qty:   'Net\\s*(?:Qty|Wt|Weight)|Quantity|Qty',
   mfr:   'Manufacturer(?:\\s*Name)?',
@@ -1301,8 +1306,21 @@ function analyse(raw) {
   const out = { items: [], dups: 0, junk: 0 };
   if (!raw) return out;
 
+  // SPACE PROVISION LOGIC: यहाँ बिना स्पेस वाले कॉमन टेक्स्ट को स्पेस में बदला जा रहा है 
+  // ताकि कोलन (:) से पहले सही कीवर्ड डिटेक्ट हो सके (उदा. MANUFACTURINGDATE: -> MANUFACTURING DATE:)
+  let cleanRaw = raw
+    .replace(/MANUFACTURINGDATE\s*:/gi, "Manufacturing Date:")
+    .replace(/DATEOFMANUFACTURING\s*:/gi, "Date of Manufacturing:")
+    .replace(/EXPIRYDATE\s*:/gi, "Expiry Date:")
+    .replace(/EXPDATE\s*:/gi, "Exp Date:")
+    .replace(/MFGDATE\s*:/gi, "Mfg Date:")
+    .replace(/RETESTDATE\s*:/gi, "Retest Date:")
+    .replace(/PRODUCTCODE\s*:/gi, "Product code:");
+
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const blocks = raw.split(/(?=\b(?:Product Identification Code|Product code)\s*:)/i);
+  
+  // यहाँ भी स्प्लिटिंग को नए स्पेस वाले पैटर्न्स के हिसाब से सेफ रखा गया है
+  const blocks = cleanRaw.split(/(?=\b(?:Product Identification Code|Product code)\s*:)/i);
   const seen = new Set();
   const nearDays = settings.nearDays;
 
