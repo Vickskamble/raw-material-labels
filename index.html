@@ -280,6 +280,12 @@
   .fill-fields input:focus{outline:2px solid #f59e0b;outline-offset:1px}
   .fill-actions{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
   .fill-hint{font-size:11px;color:#a16207}
+  .print-tip{
+    margin:12px 0 0;padding:10px 13px;border-radius:9px;font-size:12.5px;line-height:1.55;
+    background:#f8fafc;border:1px solid #e2e8f0;color:#334155;
+  }
+  .print-tip b{color:#0f172a}
+  .print-tip .k{display:inline-block;padding:0 4px;border-radius:3px;background:#fff;border:1px solid #cbd5e1;font-weight:700;color:#0f172a}
   .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.2px}
   .badge.red{background:var(--red-700);color:#fff}
   .badge.amber{background:#fbbf24;color:#000}
@@ -564,6 +570,9 @@
           Clear
         </button>
       </div>
+      <div class="print-tip no-print">
+        <b>Print tip:</b> browser ke print dialog me <b>Headers &amp; footers</b> ka tick hata dein, <span class="k">Margins: None</span> aur <span class="k">Scale: 100%</span> rakhein. Isse page ke neeche website / GitHub link print nahi hoga.
+      </div>
     </section>
 
     <div class="license-warn" id="licenseWarn" hidden>
@@ -585,7 +594,7 @@
   </main>
 
   <footer class="app-footer no-print">
-    <span>Raw Material Label System v2.5.0</span>
+    <span>Raw Material Label System v2.5.1</span>
     <span class="sep">&middot;</span>
     <span id="footerCompany">Quality Assurance</span>
     <span class="sep">&middot;</span>
@@ -616,7 +625,7 @@
     </form>
     <p class="lock-error" id="lockError" role="alert"></p>
     <p class="lock-help">Need this month's code?<br>Contact <b id="lockContact">your software supplier</b></p>
-    <p class="lock-meta" id="lockMeta">Version 2.5.0</p>
+    <p class="lock-meta" id="lockMeta">Version 2.5.1</p>
   </div>
 </div>
 
@@ -711,12 +720,12 @@
 'use strict';
 
 /* ============================================================
-   Raw Material Label System v2.5.0
+   Raw Material Label System v2.5.1
    Monthly activation-code protection (30-day period)
    Owner key generator: license_key_generator.html
    ============================================================ */
 
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.5.1';
 const PERIOD_DAYS = 30;
 const WARN_DAYS = 5;
 /* Free evaluation period on a brand-new install. Set to 0 to require a code
@@ -1473,6 +1482,7 @@ function render(res) {
   });
   const total = res.items.length;
   const st = STATUSES[statusSel.value] || STATUSES.quarantine;
+  const companyName = settings.company || 'Pharmaceutical Quality Control';
   let html = '';
 
   res.items.forEach((it, i) => {
@@ -1532,7 +1542,7 @@ function render(res) {
         ${badges ? '<div class="screen-only issue-badges">' + badges + '</div>' : ''}
         ${it.expired ? '<div class="stamp-wrap"><span class="stamp">' + (it.isRetest ? 'RETEST DUE' : 'EXPIRED') + '</span></div>' : ''}
         <div class="label-head">
-          <div class="label-company">${esc(settings.company || 'Pharmaceutical Quality Control')}</div>
+          <div class="label-company">${esc(companyName)}</div>
           <div class="label-title">Raw Material Identification Label</div>
           <div class="label-sub">Material Receipt &middot; Quality Assurance</div>
         </div>
@@ -1544,7 +1554,7 @@ function render(res) {
         <div class="footer-note">
           <div class="foot-note">${esc(settings.note || 'For internal use only')}</div>
           <div class="sign-row"><div class="sign-item"><span class="sign-cap">Checked by</span><span class="sign-line"></span></div><div class="sign-item"><span class="sign-cap">Reviewed by</span><span class="sign-line"></span></div></div>
-          <div class="foot-meta">Label ${i + 1} of ${total} &middot; Printed ${esc(stamp)}</div>
+          <div class="foot-meta">${esc(companyName)} &middot; Label ${i + 1} of ${total} &middot; Printed ${esc(stamp)}</div>
         </div>
       </div>
       ${fillBox}
