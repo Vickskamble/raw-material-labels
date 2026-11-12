@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>License Key Generator &middot; Raw Material Label System</title>
+<style>
+  :root{
+    --navy-950:#071624;
+    --navy-900:#0b1f33;
+    --navy-800:#102a43;
+    --teal-700:#0f766e;
+    --teal-600:#0d9488;
+    --green-700:#15803d;
+    --green-50:#ecfdf3;
+    --amber-700:#b45309;
+    --amber-50:#fffbeb;
+    --red-700:#b91c1c;
+    --red-50:#fef2f2;
+    --slate-50:#f8fafc;
+    --slate-100:#eef2f7;
+    --slate-200:#dde5ee;
+    --slate-300:#cbd5e1;
+    --slate-500:#64748b;
+    --slate-600:#475569;
+    --slate-700:#334155;
+    --shadow:0 1px 2px rgba(15,23,42,.05), 0 10px 30px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html,body{margin:0}
+  body{
+    font-family:"Segoe UI",Inter,system-ui,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#eef3f8,#e8eef5);
+    color:var(--navy-900);font-size:15px;line-height:1.5;min-height:100vh;
+  }
+  button,input,select{font:inherit}
+  .app-bar{
+    background:linear-gradient(115deg,#081a2b 0%,#10324e 55%,#0d4a52 100%);
+    color:#fff;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;box-shadow:0 4px 20px rgba(3,15,27,.22);
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand-mark{
+    width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#7dd3c7;
+  }
+  .brand h1{margin:0;font-size:18px;font-weight:650}
+  .brand p{margin:3px 0 0;font-size:10.5px;letter-spacing:1.3px;text-transform:uppercase;color:#9fc0d8;font-weight:600}
+  .app-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+    font-size:12px;font-weight:600;background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18);color:#e6f2fb;white-space:nowrap;
+  }
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+  .container{max-width:860px;margin:0 auto;padding:26px 20px 40px}
+  .card{
+    background:#fff;border:1px solid var(--slate-200);border-radius:14px;
+    box-shadow:var(--shadow);padding:22px;margin-bottom:18px;
+  }
+  h2{margin:0 0 4px;font-size:17px;font-weight:650}
+  h3{margin:0 0 12px;font-size:15px;font-weight:650}
+  .hint{font-size:13px;color:var(--slate-500);margin:0 0 16px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid var(--slate-300);background:#fff;color:var(--navy-800);
+    padding:9px 15px;border-radius:9px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:background .15s,border-color .15s;
+  }
+  .btn:hover{background:var(--slate-50);border-color:#94a3b8}
+  .btn:focus-visible{outline:3px solid rgba(13,148,136,.3);outline-offset:2px}
+  .btn-primary{background:linear-gradient(135deg,var(--teal-700),var(--teal-600));border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(13,148,136,.25)}
+  .btn-primary:hover{background:linear-gradient(135deg,#0e6b64,#0c857a);border-color:transparent}
+  .btn-sm{padding:6px 10px;font-size:12.5px;border-radius:7px}
+  .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
+  .btn-ghost:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3)}
+
+  /* Gate */
+  .gate-wrap{display:flex;justify-content:center;padding-top:34px}
+  .gate{width:min(430px,100%);text-align:center;padding:30px 28px}
+  .gate-icon{
+    width:60px;height:60px;border-radius:16px;margin:0 auto 16px;display:grid;place-items:center;
+    color:var(--teal-700);background:#ecfdf9;border:1px solid #99f6e4;
+  }
+  .gate-icon svg{width:28px;height:28px}
+  .gate h2{margin-bottom:6px}
+  .gate .hint{margin-bottom:20px}
+  .field{text-align:left;margin-bottom:14px}
+  .field label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--slate-600);margin-bottom:5px}
+  .field input,.field select{
+    width:100%;border:1.5px solid var(--slate-300);border-radius:9px;padding:9px 11px;
+    font-size:14px;color:var(--navy-900);background:#fff;outline:none;
+  }
+  .field input:focus,.field select:focus{border-color:var(--teal-600);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+  .field .desc{font-size:11.5px;color:var(--slate-500);margin-top:4px}
+  .error{color:var(--red-700);font-size:12.5px;font-weight:600;min-height:18px;margin:8px 0 0}
+  .gate .btn{width:100%}
+  .backup-note{font-size:11px;color:var(--slate-500);margin-top:16px;line-height:1.55}
+
+  /* Tool */
+  .notice{
+    display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.55;
+    background:var(--amber-50);border:1px solid #fde68a;color:#78350f;
+    border-radius:10px;padding:11px 14px;margin-bottom:18px;
+  }
+  .notice svg{width:17px;height:17px;flex:0 0 auto;margin-top:2px;color:var(--amber-700)}
+  .controls{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+  .controls .field{margin:0;min-width:150px;flex:1 1 160px}
+  .code-box{
+    background:linear-gradient(160deg,#0b2438,#0f334b);border:1px solid #1e4c68;
+    border-radius:12px;padding:22px 18px;text-align:center;margin:2px 0 12px;
+  }
+  .code-box .k{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#7f9db2;font-weight:700}
+  .code-box .code{
+    font-family:Consolas,"Courier New",monospace;font-size:29px;font-weight:700;
+    letter-spacing:4px;color:#b9f3e8;margin:8px 0 2px;word-break:break-all;
+  }
+  .code-box .mo{font-size:12px;color:#8fb3ca}
+  .code-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:14px 0 2px}
+  .code-actions .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff;padding:7px 13px;font-size:13px}
+  .code-actions .btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3)}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  thead th{
+    text-align:left;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--slate-500);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--slate-200);
+  }
+  tbody td{padding:9px 10px;border-bottom:1px solid var(--slate-100);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr.current{background:#f0fdfa}
+  .mono{font-family:Consolas,"Courier New",monospace;font-weight:700;letter-spacing:1.2px;color:var(--navy-800)}
+  .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+  .pill.now{background:#ccfbf1;color:#0f766e}
+  .pill.past{background:var(--slate-100);color:var(--slate-500)}
+  .pill.next{background:#eff6ff;color:#1d4ed8}
+  .row-actions{text-align:right;white-space:nowrap}
+  .table-wrap{overflow-x:auto}
+  .tiny{font-size:11.5px;color:var(--slate-500);line-height:1.6;margin:12px 0 0}
+  .toast{
+    position:fixed;right:20px;bottom:20px;z-index:100;
+    background:#0f2a42;color:#e8f1f8;font-size:13px;padding:11px 16px;
+    border-radius:10px;border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 16px 40px rgba(2,10,20,.35);
+    opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s,transform .2s;
+  }
+  .toast.show{opacity:1;transform:none}
+  .toast.error{background:#7f1d1d;border-color:#b91c1c}
+  .toast.success{background:#14532d;border-color:#15803d}
+  .footer{text-align:center;font-size:11px;color:var(--slate-500);padding:6px 0 0}
+  .footer b{color:var(--slate-600)}
+
+  @media (max-width:600px){
+    .container{padding:18px 12px 30px}
+    .card{padding:17px}
+    .app-bar{padding:13px 14px}
+    .code-box .code{font-size:22px;letter-spacing:2px}
+    .controls{gap:10px}
+  }
+
+  @media print{
+    body{background:#fff}
+    .app-bar,.notice,.controls,.code-actions,.row-actions,.card.hide-print,.toast,.footer,.gate{display:none !important}
+    .container{max-width:none;padding:0}
+    .card{box-shadow:none;border:none;padding:0;margin:0}
+    .code-box{background:#fff;border:1.5px solid #000;color:#000}
+    .code-box .k,.code-box .mo{color:#333}
+    .code-box .code{color:#000}
+    h3{margin-top:14px}
+    tbody tr.current{background:#fff}
+    .pill{border:1px solid #999}
+  }
+</style>
+</head>
+<body>
+
+<header class="app-bar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="15" r="4"/><path d="m11 12 8-8"/><path d="m15 8 3 3"/>
+      </svg>
+    </div>
+    <div>
+      <h1>License Key Generator</h1>
+      <p>Owner Tool &middot; Raw Material Label System</p>
+    </div>
+  </div>
+  <div class="app-actions">
+    <span class="chip"><span class="dot"></span> Monthly &middot; per License ID</span>
+    <button class="btn btn-ghost" id="lockBtn" type="button" hidden>Lock tool</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ================= PIN GATE ================= -->
+  <div class="gate-wrap" id="gate">
+    <div class="card gate">
+      <div class="gate-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.4"/></svg>
+      </div>
+      <h2>Owner access only</h2>
+      <p class="hint">Enter the owner PIN to generate monthly activation codes. Keep this file and PIN private.</p>
+      <form id="pinForm" autocomplete="off">
+        <div class="field">
+          <label for="pinInput">Owner PIN</label>
+          <input id="pinInput" type="password" placeholder="Enter owner PIN" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary" type="submit">Unlock generator</button>
+      </form>
+      <p class="error" id="pinError" role="alert"></p>
+      <p class="backup-note">Keep this PIN private. If it is forgotten, clear this page's browser data and the built-in default PIN will apply again.</p>
+    </div>
+  </div>
+
+  <!-- ================= GENERATOR ================= -->
+  <div id="tool" hidden>
+    <div class="notice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      <span><b>Private owner tool.</b> Never share this file with the customer. Each code is tied to the customer's License ID; entering the wrong ID will produce a code the app will reject.</span>
+    </div>
+
+    <section class="card">
+      <h2>Generate monthly activation code</h2>
+      <p class="hint">Enter the customer's License ID, choose the month, and send only that month's code. Each code works only on the computer that shows this License ID.</p>
+      <div class="controls">
+        <div class="field" style="flex:2 1 230px">
+          <label for="licIdInput">Customer License ID</label>
+          <input id="licIdInput" class="mono" type="text" maxlength="9" placeholder="XXXX-XXXX" spellcheck="false" autocomplete="off" style="text-transform:uppercase;letter-spacing:1.5px">
+          <div class="desc">Shown in the app under <b>Licence</b> and on the lock screen.</div>
+        </div>
+        <div class="field">
+          <label for="yearSel">Year</label>
+          <select id="yearSel"></select>
+        </div>
+        <div class="field">
+          <label for="monthSel">Month</label>
+          <select id="monthSel"></select>
+        </div>
+        <button class="btn" type="button" id="currentBtn">Current month</button>
+      </div>
+      <div class="code-box">
+        <div class="k">Activation code</div>
+        <div class="code" id="codeDisplay">----</div>
+        <div class="mo" id="monthLabel">&mdash;</div>
+        <div class="code-actions">
+          <button class="btn" type="button" id="copyBtn">Copy code</button>
+          <button class="btn" type="button" id="printBtn">Print full list</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>All codes for <span id="tableYear">2026</span> &middot; <span id="tableLicId" style="font-family:Consolas,monospace;font-size:13px;color:var(--teal-700)">&mdash;</span></h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Month</th><th>Activation code</th><th>Status</th><th class="row-actions">Action</th></tr></thead>
+          <tbody id="codeTable"></tbody>
+        </table>
+      </div>
+      <p class="tiny">Give the customer only the code for the month they need. Codes are case-insensitive; dashes are optional when typing. The application accepts the current month or the next month for early renewal. Each code can be used only once.</p>
+    </section>
+
+    <section class="card hide-print">
+      <h3>Change owner PIN</h3>
+      <p class="hint">Use at least 6 characters. The PIN is stored only in this browser.</p>
+      <div class="controls">
+        <div class="field">
+          <label for="newPin">New PIN</label>
+          <input id="newPin" type="password" placeholder="New PIN (min 6 characters)" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="newPin2">Confirm new PIN</label>
+          <input id="newPin2" type="password" placeholder="Repeat new PIN" autocomplete="new-password">
+        </div>
+        <button class="btn" type="button" id="savePinBtn">Update PIN</button>
+      </div>
+      <p class="error" id="pinChangeMsg"></p>
+    </section>
+  </div>
+
+  <p class="footer">Per-customer monthly codes &middot; Generator v2.3.0 &middot; Keep this tool offline</p>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   Owner key generator for Raw Material Label System v2.0.0.
+   IMPORTANT: SECRET / codeFor() must stay identical to the
+   application file, otherwise activation codes will not match.
+   ============================================================ */
+
+/* PIN hashing key (owner login only). */
+const SECRET = String.fromCharCode(82,77,76,83,45,80,72,65,82,77,65,45,75,69,89,45,50,48,50,54) + '|v2|K7q2';
+/* Per-customer code key. Must stay identical to the application file. */
+const SITE_SECRET = [121,102,103,108,4,4,122,104,4,4,25,27,25,29,4,4,18,77,31,72,26,73,28,78,30,79,25,74,4,4,106,115,30,25]
+  .map(c => String.fromCharCode(c ^ 0x2b)).join('');
+const DEFAULT_PIN = 'GMP@2026';
+const PIN_KEY = 'lkg.pin.v2';
+const LAST_ID_KEY = 'lkg.lastId.v2';
+
+function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii.length * 8;
+  let hash = sha256.h = sha256.h || [];
+  let k = sha256.k = sha256.k || [];
+  let primeCounter = k.length;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+  ascii += '\x80';
+  while (ascii.length % 64 - 56) ascii += '\x00';
+  for (let i = 0; i < ascii.length; i++) {
+    const j = ascii.charCodeAt(i);
+    if (j >> 8) return '';
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words.length] = ((asciiBitLength / maxWord) | 0);
+  words[words.length] = (asciiBitLength);
+  for (let j = 0; j < words.length;) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (let i = 0; i < 64; i++) {
+      const w15 = w[i - 15];
+      const w2 = w[i - 2];
+      const a = hash[0];
+      const e = hash[4];
+      const temp1 = (hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0)) | 0;
+      const temp2 = ((rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]))) | 0;
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (let i = 0; i < 8; i++) {
+    for (let j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+function normLicId(v) {
+  const h = String(v || '').toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 8);
+  return h.length === 8 ? h.slice(0, 4) + '-' + h.slice(4) : '';
+}
+
+function formatLicId(v) {
+  const h = String(v || '').toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 8);
+  return h.length > 4 ? h.slice(0, 4) + '-' + h.slice(4) : h;
+}
+
+function codeFor(ym) {
+  const id = normLicId($('licIdInput').value);
+  if (!id) return '';
+  const hex = sha256(SITE_SECRET + '|' + id.replace('-', '') + '|' + ym + '|RMLG1').slice(0, 12).toUpperCase();
+  return hex.slice(0, 4) + '-' + hex.slice(4, 8) + '-' + hex.slice(8, 12);
+}
+
+function monthLabel(y, m) {
+  return new Date(y, m, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+}
+
+function hashPin(pin) {
+  return sha256('LKG-PIN|' + pin + '|' + SECRET).slice(0, 40);
+}
+
+function currentPinHash() {
+  try {
+    return localStorage.getItem(PIN_KEY) || hashPin(DEFAULT_PIN);
+  } catch (e) {
+    return hashPin(DEFAULT_PIN);
+  }
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const $ = id => document.getElementById(id);
+const now = new Date();
+const TODAY = { y: now.getFullYear(), m: now.getMonth() };
+let attempts = 0;
+let cooldownUntil = 0;
+let unlocked = false;
+
+const yearSel = $('yearSel');
+const monthSel = $('monthSel');
+const licIdInput = $('licIdInput');
+const codeDisplay = $('codeDisplay');
+const monthLabelEl = $('monthLabel');
+
+/* ---------- Init selects ---------- */
+(function initSelects() {
+  const start = TODAY.y - 1;
+  for (let y = start; y <= TODAY.y + 3; y++) {
+    const o = document.createElement('option');
+    o.value = String(y);
+    o.textContent = String(y);
+    yearSel.appendChild(o);
+  }
+  yearSel.value = String(TODAY.y);
+
+  for (let m = 0; m < 12; m++) {
+    const o = document.createElement('option');
+    o.value = String(m);
+    o.textContent = monthLabel(TODAY.y, m).split(' ')[0];
+    monthSel.appendChild(o);
+  }
+  monthSel.value = String(TODAY.m);
+})();
+
+/* ---------- Init ---------- */
+(function initLicenseId() {
+  try {
+    const saved = normLicId(localStorage.getItem(LAST_ID_KEY) || '');
+    if (saved) licIdInput.value = saved;
+  } catch (e) { /* ignore */ }
+})();
+
+licIdInput.addEventListener('input', () => {
+  licIdInput.value = formatLicId(licIdInput.value);
+  try { localStorage.setItem(LAST_ID_KEY, licIdInput.value); } catch (e) { /* ignore */ }
+  updateCode();
+});
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg, type) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3000);
+}
+
+/* ---------- Code display ---------- */
+function updateCode() {
+  if (!unlocked) return;
+  const y = parseInt(yearSel.value, 10);
+  const m = parseInt(monthSel.value, 10);
+  const id = normLicId(licIdInput.value);
+  const code = codeFor(y * 100 + m + 1);
+  if (!id) {
+    codeDisplay.textContent = '----';
+    monthLabelEl.textContent = 'Enter a valid customer License ID';
+  } else {
+    codeDisplay.textContent = code;
+    monthLabelEl.textContent = 'License ID ' + id + ' \u00b7 ' + monthLabel(y, m) +
+      ((y === TODAY.y && m === TODAY.m) ? ' \u00b7 current month' : '');
+  }
+  renderTable();
+}
+
+function statusFor(y, m) {
+  const v = y * 12 + m;
+  const t = TODAY.y * 12 + TODAY.m;
+  if (v === t) return { cls: 'now', text: 'Current' };
+  if (v < t) return { cls: 'past', text: 'Past' };
+  return { cls: 'next', text: 'Upcoming' };
+}
+
+function renderTable() {
+  if (!unlocked) return;
+  const y = parseInt(yearSel.value, 10);
+  const id = normLicId(licIdInput.value);
+  $('tableYear').textContent = String(y);
+  $('tableLicId').textContent = id || '\u2014';
+  if (!id) {
+    $('codeTable').innerHTML = '<tr><td colspan="4" style="padding:22px 10px;text-align:center;color:var(--slate-500)">Enter the customer License ID above to see all monthly codes.</td></tr>';
+    return;
+  }
+  let html = '';
+  for (let m = 0; m < 12; m++) {
+    const st = statusFor(y, m);
+    const code = codeFor(y * 100 + m + 1);
+    html += '<tr' + (st.cls === 'now' ? ' class="current"' : '') + '>' +
+      '<td>' + esc(monthLabel(y, m)) + '</td>' +
+      '<td class="mono">' + code + '</td>' +
+      '<td><span class="pill ' + st.cls + '">' + st.text + '</span></td>' +
+      '<td class="row-actions"><button class="btn btn-sm" type="button" data-copy="' + code + '">Copy</button></td>' +
+      '</tr>';
+  }
+  $('codeTable').innerHTML = html;
+
+  $('codeTable').querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => copyText(btn.getAttribute('data-copy')));
+  });
+}
+
+/* ---------- Clipboard ---------- */
+function copyText(text) {
+  const done = () => toast('Copied ' + text, 'success');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+
+function fallbackCopy(text, done) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  } catch (e) {
+    toast('Copy failed. Select the code manually.', 'error');
+  }
+}
+
+/* ---------- PIN gate ---------- */
+function startCooldown() {
+  cooldownUntil = Date.now() + 30000;
+  const tick = () => {
+    const left = Math.ceil((cooldownUntil - Date.now()) / 1000);
+    if (left > 0) {
+      $('pinError').textContent = 'Too many incorrect attempts. Try again in ' + left + 's.';
+      setTimeout(tick, 500);
+    } else {
+      $('pinError').textContent = '';
+      attempts = 0;
+    }
+  };
+  tick();
+}
+
+$('pinForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (Date.now() < cooldownUntil) return;
+  const pin = $('pinInput').value;
+  if (!pin) {
+    $('pinError').textContent = 'Enter the owner PIN.';
+    return;
+  }
+  if (hashPin(pin) === currentPinHash()) {
+    unlocked = true;
+    $('pinInput').value = '';
+    $('pinError').textContent = '';
+    $('gate').hidden = true;
+    $('tool').hidden = false;
+    $('lockBtn').hidden = false;
+    updateCode();
+    if (!normLicId(licIdInput.value)) licIdInput.focus();
+    toast('Generator unlocked.', 'success');
+  } else {
+    attempts++;
+    if (attempts >= 5) {
+      attempts = 0;
+      startCooldown();
+    } else {
+      $('pinError').textContent = 'Incorrect PIN. ' + (5 - attempts) + ' attempt' + ((5 - attempts) === 1 ? '' : 's') + ' remaining.';
+    }
+    $('pinInput').select();
+  }
+});
+
+$('lockBtn').addEventListener('click', () => {
+  unlocked = false;
+  $('tool').hidden = true;
+  $('gate').hidden = false;
+  $('lockBtn').hidden = true;
+  $('pinInput').focus();
+});
+
+/* ---------- Code controls ---------- */
+yearSel.addEventListener('change', updateCode);
+monthSel.addEventListener('change', updateCode);
+
+$('currentBtn').addEventListener('click', () => {
+  yearSel.value = String(TODAY.y);
+  monthSel.value = String(TODAY.m);
+  updateCode();
+  toast('Current month selected.');
+});
+
+$('copyBtn').addEventListener('click', () => {
+  const id = normLicId(licIdInput.value);
+  if (!id) { toast('Enter the customer License ID first.', 'error'); licIdInput.focus(); return; }
+  const code = codeFor(parseInt(yearSel.value, 10) * 100 + parseInt(monthSel.value, 10) + 1);
+  copyText(code);
+});
+
+$('printBtn').addEventListener('click', () => window.print());
+
+/* ---------- Change PIN ---------- */
+$('savePinBtn').addEventListener('click', () => {
+  const p1 = $('newPin').value;
+  const p2 = $('newPin2').value;
+  const msg = $('pinChangeMsg');
+  msg.className = 'error';
+  if (p1.length < 6) {
+    msg.textContent = 'PIN must be at least 6 characters.';
+    return;
+  }
+  if (p1 !== p2) {
+    msg.textContent = 'The two PIN entries do not match.';
+    return;
+  }
+  try {
+    localStorage.setItem(PIN_KEY, hashPin(p1));
+    msg.className = 'error form-ok';
+    msg.style.color = 'var(--green-700)';
+    msg.textContent = 'Owner PIN updated successfully.';
+    $('newPin').value = '';
+    $('newPin2').value = '';
+    toast('Owner PIN updated.', 'success');
+  } catch (e) {
+    msg.textContent = 'Could not save the PIN in this browser.';
+  }
+});
+
+/* ---------- Init ---------- */
+$('pinInput').focus();
+</script>
+</body>
+</html>

@@ -1,10 +1,11 @@
 /* Raw Material Label System - offline service worker
    Cache ka naam har release par badlein, warna purani file serve hoti rahegi. */
-const CACHE = 'rmls-v2.5.2';
+const CACHE = 'rmls-v2.6.0';
 
 const SHELL = [
   './',
   './index.html',
+  './generator.html',
   './manifest.webmanifest',
   './icons/icon.svg',
   './icons/icon-192.png',
